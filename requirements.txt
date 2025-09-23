@@ -1,0 +1,163 @@
+# Professional Image Evaluation System - Dependencies
+# Optimized for CPU processing with integrated graphics support
+# Last updated: September 23, 2025
+
+# ========================================
+# CORE DEEP LEARNING FRAMEWORK
+# ========================================
+
+# TensorFlow - Core ML framework (compatible with DeepFace)
+tensorflow==2.20.0
+tf-keras==2.20.1
+
+# PyTorch - CPU optimized for cross-platform systems
+torch==2.7.1+cpu
+torchvision==0.22.1+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# ========================================
+# FACE RECOGNITION & ANALYSIS
+# ========================================
+
+# DeepFace - Professional face recognition library
+deepface==0.0.95
+
+# Additional face detection backends
+mtcnn==1.0.0
+retina-face==0.0.17
+
+# MediaPipe - CPU-friendly face detection alternative
+# mediapipe>=0.10.0  # Uncomment if needed
+
+# ========================================
+# COMPUTER VISION & IMAGE PROCESSING
+# ========================================
+
+# OpenCV - Computer vision library
+opencv-python==4.12.0.88
+opencv-contrib-python==4.12.0.88
+
+# Image processing
+pillow==11.0.0
+scikit-image==0.25.2
+imageio==2.37.0
+
+# ========================================
+# SCIENTIFIC COMPUTING
+# ========================================
+
+# NumPy - Numerical computing
+numpy==2.1.2
+
+# SciPy - Scientific computing
+scipy==1.16.2
+
+# Pandas - Data manipulation
+pandas==2.3.2
+
+# ========================================
+# VISUALIZATION
+# ========================================
+
+# Matplotlib - Plotting library
+matplotlib==3.10.6
+
+# Seaborn - Statistical visualization
+seaborn==0.13.2
+
+# Plotly - Interactive plots
+plotly==6.3.0
+
+# ========================================
+# WEB INTERFACE
+# ========================================
+
+# Gradio - Web interface framework
+gradio==5.46.1
+gradio_client==1.13.1
+
+# FastAPI - Additional web framework components
+fastapi==0.117.1
+uvicorn==0.37.0
+
+# ========================================
+# EVALUATION METRICS
+# ========================================
+
+# LPIPS - Perceptual similarity metric
+lpips==0.1.4
+
+# ========================================
+# UTILITIES & SUPPORT
+# ========================================
+
+# Progress bars
+tqdm==4.67.1
+
+# HTTP requests
+requests==2.32.5
+
+# YAML configuration
+PyYAML==6.0.2
+
+# File handling
+aiofiles==24.1.0
+
+# Audio processing (for multimedia support)
+pydub==0.25.1
+
+# ========================================
+# TRANSFORMER MODELS & NLP
+# ========================================
+
+# Hugging Face ecosystem
+transformers==4.56.2
+huggingface-hub==0.35.1
+tokenizers==0.22.1
+safetensors==0.6.2
+
+# CLIP model for vision-language tasks
+clip==1.0
+
+# ========================================
+# SYSTEM & PERFORMANCE
+# ========================================
+
+# System utilities
+psutil==7.1.0
+
+# Data validation
+pydantic==2.11.9
+pydantic_core==2.33.2
+
+# Compression
+lz4==4.4.4
+
+# ========================================
+# DEVELOPMENT & DEBUGGING
+# ========================================
+
+# Rich text and formatting
+rich==14.1.0
+Pygments==2.19.2
+
+# Code formatting (optional)
+# ruff==0.13.1  # Uncomment for development
+
+# ========================================
+# COMPATIBILITY NOTES
+# ========================================
+
+# Important: This configuration is specifically tested on:
+# - Integrated graphics systems
+# - Windows 11
+# - Python 3.13
+# - CPU-only processing mode
+
+# TensorFlow 2.20.0 is used for DeepFace compatibility
+# Some newer TF versions may have LocallyConnected2D issues
+
+# For best performance on integrated graphics:
+# 1. Ensure CPU mode is used (no CUDA)
+# 2. Set appropriate thread counts based on CPU cores
+# 3. Use system memory efficiently

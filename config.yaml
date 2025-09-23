@@ -1,0 +1,84 @@
+# 图像一致性评估系统配置文件
+
+# 设备配置
+device: auto  # auto, cpu, cuda
+gpu_id: 0     # GPU设备ID
+
+# 模型配置
+models:
+  clip:
+    model_name: "ViT-B/32"
+    cache_dir: "./models/clip"
+  
+  face_detection:
+    method: "mtcnn"  # mtcnn, dlib
+    confidence_threshold: 0.9
+  
+  lpips:
+    network: "alex"  # alex, vgg, squeeze
+    version: "0.1"
+
+# 评估指标权重
+metric_weights:
+  clip_similarity: 0.30
+  identity_similarity: 0.25
+  lpips_similarity: 0.25
+  ssim_similarity: 0.10
+  psnr_similarity: 0.10
+
+# 评估阈值
+thresholds:
+  clip_threshold: 0.70
+  identity_threshold: 0.60
+  lpips_threshold: 0.30
+  ssim_threshold: 0.80
+  psnr_threshold: 20.0
+
+# 图像处理配置
+image_processing:
+  target_size: [224, 224]
+  max_size: 1024
+  normalize: true
+  enhance: false
+
+# 可视化配置  
+visualization:
+  figure_size: [12, 8]
+  dpi: 100
+  color_palette: "husl"
+  font_family: "SimHei"
+
+# Web界面配置
+web_interface:
+  host: "127.0.0.1"
+  port: 7860
+  share: false
+  debug: false
+  auth: null  # [username, password] 或 null
+
+# 日志配置
+logging:
+  level: "INFO"
+  file: "evaluation_system.log"
+  max_size: "10MB"
+  backup_count: 5
+
+# 缓存配置
+cache:
+  enable: true
+  directory: "./cache"
+  max_size: "1GB"
+  cleanup_interval: 3600  # 秒
+
+# 批量处理配置
+batch_processing:
+  max_batch_size: 32
+  parallel_workers: 4
+  timeout: 300  # 秒
+
+# 输出配置
+output:
+  save_results: true
+  results_dir: "./results"
+  image_format: "png"
+  report_format: "markdown"
