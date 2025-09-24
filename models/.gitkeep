@@ -1,0 +1,2 @@
+# This file ensures the models directory is kept in Git
+# Large model files are ignored via .gitignore but this directory structure is preserved
