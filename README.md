@@ -1,32 +1,34 @@
-# 图像一致性评估系统 🎯
+# Professional Image Evaluation System 🔬
 
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Gradio](https://img.shields.io/badge/Gradio-Web%20UI-orange)](https://gradio.app/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.20.0-orange.svg)](https://tensorflow.org/)
+[![DeepFace](https://img.shields.io/badge/DeepFace-Professional-green.svg)](https://github.com/serengil/deepface)
+[![Gradio](https://img.shields.io/badge/Gradio-Web%20Interface-purple)](https://gradio.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-这是一个全面的AI图像生成质量评估系统，专注于评估生成图像在多个维度上的一致性。系统集成了最新的深度学习技术和传统图像处理方法，提供客观、全面的图像质量评估。
+A comprehensive AI-powered image analysis platform that combines state-of-the-art deep learning models with traditional computer vision techniques for professional-grade image evaluation and face recognition capabilities.
 
-![System Demo](docs/demo.gif)
+## ✨ Key Features
 
-## ✨ 核心特点
+### 🔬 Multi-Dimensional Analysis
+- **Professional Face Recognition**: Multi-model DeepFace integration with VGG-Face, FaceNet, OpenFace
+- **Identity Verification**: Advanced demographic analysis (age, gender, emotion, race detection)
+- **Image Quality Assessment**: Traditional metrics (SSIM, PSNR, MSE) and perceptual similarity
+- **Color Analysis**: Histogram-based color distribution comparison
+- **Real-time Processing**: Optimized for 3-5 second evaluation cycles
 
-### 🔬 多维度评估指标
-- **CLIP语义一致性**: 评估生成图像与文本提示词的语义匹配程度
-- **身份一致性**: 使用人脸识别技术评估人物身份的保持程度
-- **感知相似度**: 使用LPIPS评估基于人类视觉感知的图像相似度
-- **传统图像质量指标**: SSIM、PSNR、MSE、MAE等经典指标
+### 🏗️ System Architecture
+- **CPU Optimized**: Designed for integrated graphics and multi-core systems
+- **Modular Design**: Easily extensible evaluation framework
+- **Professional-Grade**: Industry-standard deep learning models
+- **Cross-Platform**: Windows, macOS, Linux support
+- **Web Interface**: Modern Gradio-based dashboard
 
-### 🏗️ 系统架构
-- **模块化设计**: 便于扩展新的评估指标和功能
-- **统一评分框架**: 标准化的分数归一化和聚合机制
-- **智能权重分配**: 可配置的指标权重和阈值设置
-- **批量处理支持**: 高效的大规模图像评估能力
-
-### 🎨 用户界面
-- **交互式Web界面**: 基于Gradio的现代化操作界面
-- **实时可视化**: 动态图表和评估结果展示
-- **直观报告生成**: 自动生成详细的评估报告
-- **多格式导出**: 支持JSON、CSV、Markdown等格式
+### 🎨 User Experience
+- **Drag & Drop Interface**: Intuitive file uploads
+- **Real-time Visualization**: Dynamic result formatting
+- **Comprehensive Reports**: Detailed analysis with interpretation guides
+- **Multiple Formats**: Support for JPG, PNG, BMP, TIFF images
 
 ## 🚀 快速开始
 
