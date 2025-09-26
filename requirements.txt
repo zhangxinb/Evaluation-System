@@ -87,6 +87,17 @@ uvicorn==0.37.0
 # LPIPS - Perceptual similarity metric
 lpips==0.1.4
 
+# CLIP - Vision-language model for character analysis
+clip-by-openai==1.0
+ftfy==6.1.1  # Required for CLIP text processing
+
+# Instance Segmentation (Detectron2) - For character cropping
+# Note: Install detectron2 separately with CPU support
+# git+https://github.com/facebookresearch/detectron2.git
+
+# Alternative segmentation models
+segment-anything==1.0  # Optional: SAM for better segmentation
+
 # ========================================
 # UTILITIES & SUPPORT
 # ========================================
@@ -116,8 +127,7 @@ huggingface-hub==0.35.1
 tokenizers==0.22.1
 safetensors==0.6.2
 
-# CLIP model for vision-language tasks
-clip==1.0
+# CLIP models handled in evaluation metrics section
 
 # ========================================
 # SYSTEM & PERFORMANCE

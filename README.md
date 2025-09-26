@@ -2,319 +2,468 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.20.0-orange.svg)](https://tensorflow.org/)
-[![DeepFace](https://img.shields.io/badge/DeepFace-Professional-green.svg)](https://github.com/serengil/deepface)
-[![Gradio](https://img.shields.io/badge/Gradio-Web%20Interface-purple)](https://gradio.app/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DeepFace](https://img.shields.io/badge/DeepFace-0.0.95-green.svg)](https://github.com/serengil/deepface)
+[![CLIP](https://img.shields.io/badge/CLIP-ViT--B/32-red.svg)](https://github.com/openai/CLIP)
+[![LPIPS](https://img.shields.io/badge/LPIPS-AlexNet-orange.svg)](https://github.com/richzhang/PerceptualSimilarity)
+[![Gradio](https://img.shields.io/badge/Gradio-5.46.1-purple)](https://gradio.app/)
 
-A comprehensive AI-powered image analysis platform that combines state-of-the-art deep learning models with traditional computer vision techniques for professional-grade image evaluation and face recognition capabilities.
+A state-of-the-art AI-powered image evaluation platform that combines advanced deep learning algorithms (CLIP, LPIPS, multi-model face recognition) with traditional computer vision techniques for professional character consistency analysis and identity verification.
+
+## 🎯 Overview
+
+This professional-grade evaluation system is specifically designed for analyzing character consistency in AI-generated images, particularly for applications involving face recognition, identity verification, and semantic similarity assessment. The system integrates cutting-edge algorithms with robust fallback mechanisms to ensure reliable results across different hardware configurations.
 
 ## ✨ Key Features
 
-### 🔬 Multi-Dimensional Analysis
-- **Professional Face Recognition**: Multi-model DeepFace integration with VGG-Face, FaceNet, OpenFace
-- **Identity Verification**: Advanced demographic analysis (age, gender, emotion, race detection)
-- **Image Quality Assessment**: Traditional metrics (SSIM, PSNR, MSE) and perceptual similarity
-- **Color Analysis**: Histogram-based color distribution comparison
-- **Real-time Processing**: Optimized for 3-5 second evaluation cycles
+### 🧠 Advanced Algorithm Integration
+- **CLIP (ViT-B/32)**: OpenAI's Vision Transformer for semantic similarity analysis
+- **LPIPS (AlexNet)**: Learned Perceptual Image Patch Similarity for human-aligned perception metrics
+- **Multi-Model Face Recognition**: DeepFace integration with VGG-Face, FaceNet, OpenFace, and DeepFace models
+- **Enhanced Fallback System**: Traditional CV methods (SSIM, LBP, Template Matching, ORB) for robustness
 
 ### 🏗️ System Architecture
-- **CPU Optimized**: Designed for integrated graphics and multi-core systems
-- **Modular Design**: Easily extensible evaluation framework
-- **Professional-Grade**: Industry-standard deep learning models
-- **Cross-Platform**: Windows, macOS, Linux support
-- **Web Interface**: Modern Gradio-based dashboard
+- **CPU Optimized**: Designed for integrated graphics (AMD 780M) and CPU-only processing
+- **Modular Design**: Three core components with clear separation of concerns
+- **Compatibility Layer**: Graceful handling of dependency conflicts and hardware limitations
+- **Professional Reporting**: Six-section English analysis reports with detailed interpretations
 
 ### 🎨 User Experience
-- **Drag & Drop Interface**: Intuitive file uploads
-- **Real-time Visualization**: Dynamic result formatting
-- **Comprehensive Reports**: Detailed analysis with interpretation guides
-- **Multiple Formats**: Support for JPG, PNG, BMP, TIFF images
+- **Web Interface**: Modern Gradio-based dashboard running on port 7862
+- **Real-time Processing**: Optimized for 5-15 second evaluation cycles
+- **Comprehensive Reports**: Professional-grade analysis with scoring and recommendations
+- **Multiple Format Support**: JPG, PNG, BMP, TIFF image formats
 
-## 🚀 快速开始
+## 🔬 Algorithm Details
 
-### 自动安装（推荐）
+### 1. CLIP Semantic Analysis
+**Technical Specifications:**
+- **Model**: OpenAI ViT-B/32 (Vision Transformer)
+- **Processing Mode**: CPU-optimized with 30-second timeout protection
+- **Evaluation Range**: 0.0000 - 1.0000 (cosine similarity)
+- **Recommended Threshold**: ≥ 0.7000 for high semantic consistency
+- **Weight in Final Score**: 30%
 
-```bash
-# 1. 克隆项目
-git clone <repository-url>
-cd evaluation-system
+**What it measures:** Semantic alignment between image content and text prompts, character concept consistency, and high-level visual understanding.
 
-# 2. 运行自动安装脚本
-python install.py
+### 2. LPIPS Perceptual Similarity
+**Technical Specifications:**
+- **Model**: AlexNet-based learned perceptual metric
+- **Processing Mode**: CPU processing with 20-second timeout
+- **Evaluation Range**: 0.0000 - 1.0000 (perceptual distance)
+- **Recommended Threshold**: ≤ 0.3000 for perceptually similar images
+- **Weight in Final Score**: 25%
 
-# 3. 测试系统
-python test_system.py
+**What it measures:** Human-aligned perceptual similarity, focusing on features that matter most to human visual perception rather than pixel-level differences.
 
-# 4. 启动应用
-python app.py
+### 3. Multi-Model Face Recognition
+**Technical Specifications:**
+- **Primary Models**: VGG-Face, FaceNet, OpenFace, DeepFace (via DeepFace library)
+- **Consensus Method**: Weighted average with confidence scoring
+- **Fallback Methods**: 
+  - Multi-Scale SSIM (Structural Similarity Index)
+  - LBP (Local Binary Patterns) histogram comparison
+  - Template matching with normalized cross-correlation
+  - ORB (Oriented FAST and Rotated BRIEF) feature matching
+- **Evaluation Range**: 0.0000 - 1.0000 (identity similarity)
+- **Recommended Threshold**: ≥ 0.6000 for same identity
+- **Weight in Final Score**: 25%
+
+**What it measures:** Identity consistency across different poses, lighting conditions, and expressions while providing robust fallback for challenging cases.
+
+### 4. Traditional Computer Vision Metrics
+**Included Metrics:**
+- **SSIM**: Structural Similarity Index (0.0 - 1.0, threshold ≥ 0.8)
+- **PSNR**: Peak Signal-to-Noise Ratio (dB, threshold ≥ 20)
+- **MSE**: Mean Squared Error (lower is better)
+- **Color Histogram Correlation**: (0.0 - 1.0, threshold ≥ 0.7)
+- **Combined Weight in Final Score**: 20%
+
+## 📁 Project Structure
+
+```
+Evaluation System/
+├── 📄 launch_simple_amd.py              # Main application launcher (469 lines)
+│   ├── 🎯 format_advanced_results()     # Professional 6-section English reporting
+│   ├── 🔄 format_fallback_results()     # Fallback mode formatting
+│   └── 🚀 create_gradio_interface()     # Web UI initialization
+│
+├── 📄 compatible_evaluation_system.py   # Core evaluation engine (536 lines)
+│   ├── 🧠 _safe_clip_analysis()         # CLIP with timeout protection
+│   ├── 👁️ _safe_lpips_analysis()        # LPIPS with error handling
+│   ├── 🎯 evaluate_character_consistency() # Main evaluation orchestrator
+│   └── 📊 _calculate_traditional_metrics() # Classical CV metrics
+│
+├── 📄 professional_identity_evaluator.py # Face recognition system (386 lines)
+│   ├── 👤 calculate_identity_similarity() # Multi-model face analysis
+│   ├── 🔄 _fallback_evaluation()        # Traditional CV fallback methods
+│   └── 📈 _enhanced_fallback_analysis() # 4-method ensemble approach
+│
+├── 📄 requirements.txt                  # Comprehensive dependency list
+├── 📖 README.md                        # This documentation
+├── 🔧 .gitignore                       # Git ignore patterns
+├── 📂 .venv/                           # Python virtual environment
+└── 📂 .git/                            # Git version control
 ```
 
-### 手动安装
+## 🚀 Installation & Setup
+
+### Prerequisites
+- **Python**: 3.8 or higher (tested with Python 3.13)
+- **Operating System**: Windows 11 (tested), macOS, or Linux
+- **Memory**: 8GB RAM minimum (16GB recommended)
+- **Storage**: 5GB available space for models and dependencies
+- **Network**: Internet connection required for initial model downloads
+
+### Quick Installation
 
 ```bash
-# 1. 安装依赖
+# 1. Clone the repository
+git clone https://github.com/zhangxinb/Evaluation-System.git
+cd Evaluation-System
+
+# 2. Create virtual environment (recommended)
+python -m venv .venv
+
+# 3. Activate virtual environment
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# 2. （可选）安装GPU支持
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-
-# 3. 启动应用
-python app.py
+# 5. Launch the application
+python launch_simple_amd.py
 ```
 
-### 快速演示
+### Manual Installation Steps
+
+If you prefer manual installation or encounter issues:
 
 ```bash
-# 查看功能演示和系统状态
-python demo.py
+# Install core dependencies
+pip install tensorflow==2.20.0
+pip install torch==2.7.1+cpu torchvision==0.22.1+cpu --extra-index-url https://download.pytorch.org/whl/cpu
+pip install deepface==0.0.95
+pip install gradio==5.46.1
+pip install opencv-python==4.12.0.88
+pip install lpips==0.1.4
+pip install clip-by-openai==1.0
+
+# Install supporting packages
+pip install numpy==2.1.2 pillow==11.0.0 scikit-image==0.25.2
+pip install matplotlib==3.10.6 tqdm==4.67.1 requests==2.32.5
 ```
 
-## 📖 详细使用指南
+### Verification
 
-### 启动系统
+After installation, verify the system works correctly:
 
 ```bash
-# 基本启动
-python app.py
-
-# 自定义配置启动
-python app.py --host 0.0.0.0 --port 8080 --share
-
-# 启用调试模式
-python app.py --debug
+# Check if all models load successfully
+python -c "
+from compatible_evaluation_system import CompatibleEvaluationSystem
+system = CompatibleEvaluationSystem()
+print('Available methods:', list(system.available_methods.keys()))
+"
 ```
 
-### Web界面使用
+Expected output should show: `['professional', 'clip', 'lpips']`
 
-1. **单图像评估**
-   - 上传生成图像（必需）
-   - 上传参考图像（可选，用于相似度评估）
-   - 输入文本提示词（可选，用于CLIP评估）
-   - 选择评估指标
-   - 点击"开始评估"查看结果
+## 🎯 Usage Guide
 
-2. **批量评估**
-   - 上传多个图像文件
-   - 提供对应的提示词列表
-   - 选择评估指标
-   - 下载评估报告和结果文件
+### Starting the Application
 
-3. **系统设置**
-   - 调整评估阈值
-   - 配置模型参数
-   - 自定义权重设置
+```bash
+# Standard launch (recommended)
+python launch_simple_amd.py
 
-### API使用示例
+# The application will start on: http://127.0.0.1:7862
+```
+
+### Web Interface Operations
+
+1. **Upload Images**: 
+   - **Generated Image**: Primary image to evaluate (required)
+   - **Reference Image**: Comparison baseline (optional, for similarity analysis)
+
+2. **Input Parameters**:
+   - **Text Prompt**: Description for CLIP semantic analysis (optional)
+   - **Evaluation Type**: Character consistency analysis (default)
+
+3. **Results Interpretation**:
+   - **Final Score**: 0-100 composite score with color-coded assessment
+   - **Detailed Analysis**: Six-section professional report
+   - **Algorithm Breakdown**: Individual metric scores and interpretations
+
+### API Usage Example
 
 ```python
-from evaluation_manager import EvaluationManager
-from PIL import Image
+from compatible_evaluation_system import CompatibleEvaluationSystem
+import cv2
 
-# 创建评估管理器
-manager = EvaluationManager()
-manager.initialize_evaluators()
+# Initialize the system
+evaluator = CompatibleEvaluationSystem()
 
-# 加载图像
-generated_img = Image.open("generated_image.jpg")
-reference_img = Image.open("reference_image.jpg")
+# Load images
+img1 = cv2.imread('generated_character.jpg')
+img2 = cv2.imread('reference_character.jpg')
 
-# 全面评估
-results = manager.evaluate_comprehensive(
-    generated_image=generated_img,
-    reference_image=reference_img,
-    prompt="a beautiful landscape painting",
-    metrics=['clip', 'identity', 'perceptual', 'traditional']
+# Perform evaluation
+results = evaluator.evaluate_character_consistency(
+    img1, img2, 
+    prompt="a professional headshot of a person",
+    use_advanced=True
 )
 
-# 查看结果
-print(f"综合评分: {results['overall_score']:.1f}/100")
-print(f"总体评价: {results['overall_evaluation']}")
-
-# 生成报告
-report = manager.generate_evaluation_report(results)
-print(report)
-
-# 保存结果
-manager.save_evaluation_results(results, "evaluation_results.json")
+# Access results
+print(f"Final Score: {results['Final_Score']:.1f}/100")
+print(f"CLIP Similarity: {results.get('CLIP_Similarity', 'N/A')}")
+print(f"Identity Similarity: {results.get('Identity_Similarity', 'N/A')}")
+print(f"LPIPS Distance: {results.get('LPIPS_Distance', 'N/A')}")
 ```
 
-## 📁 项目结构
+## ⚖️ Scoring System & Weights
 
-```
-evaluation_system/
-├── 📂 core/                    # 核心评估模块
-│   ├── 🧠 clip_evaluator.py      # CLIP语义一致性评估
-│   ├── 👤 identity_evaluator.py   # 身份一致性评估
-│   ├── 👁️ perceptual_evaluator.py # 感知相似度评估
-│   └── 📊 traditional_metrics.py  # 传统图像质量指标
-├── 📂 utils/                   # 工具函数模块
-│   ├── 📥 data_loader.py          # 数据加载和管理
-│   ├── 🔧 preprocessor.py         # 图像预处理
-│   └── 📈 visualizer.py           # 可视化工具
-├── 📂 dashboard/               # 用户界面模块
-│   └── 🌐 gradio_app.py          # Gradio Web界面
-├── 📂 config/                  # 配置文件
-│   └── ⚙️ settings.py            # 系统设置
-├── 📂 docs/                    # 文档资源
-├── 🎯 evaluation_manager.py    # 统一评估管理器
-├── 🚀 app.py                  # 主应用入口
-├── 🔧 install.py              # 自动安装脚本
-├── 🎪 demo.py                 # 功能演示脚本
-├── 📋 requirements.txt        # 依赖包列表
-├── ⚙️ config.yaml             # 配置文件
-├── 📚 USER_MANUAL.md          # 用户手册
-└── 📖 README.md               # 项目说明
+### Final Score Calculation
+
+The system uses a weighted average approach to compute the final score:
+
+```python
+# Scoring weights (customizable)
+CLIP_WEIGHT = 0.30        # 30% - Semantic consistency
+IDENTITY_WEIGHT = 0.25    # 25% - Face recognition accuracy  
+LPIPS_WEIGHT = 0.25       # 25% - Perceptual similarity
+TRADITIONAL_WEIGHT = 0.20 # 20% - Classical metrics (SSIM, PSNR, etc.)
+
+# Final score formula
+final_score = (
+    clip_similarity * CLIP_WEIGHT +
+    identity_similarity * IDENTITY_WEIGHT +
+    (1.0 - lpips_distance) * LPIPS_WEIGHT +
+    traditional_average * TRADITIONAL_WEIGHT
+) * 100
 ```
 
-## 🔬 评估指标详解
+### Score Interpretation
 
-### CLIP语义一致性
-- **评分范围**: 0.0 - 1.0
-- **推荐阈值**: ≥ 0.7
-- **权重**: 30%
-- **用途**: 评估图像与文本描述的语义匹配程度
+| Score Range | Assessment | Color Code | Interpretation |
+|-------------|------------|------------|----------------|
+| 90-100 | Excellent | 🟢 | Outstanding consistency, production-ready |
+| 80-89 | Very Good | 🟢 | High quality with minor variations |
+| 70-79 | Good | 🟡 | Acceptable consistency, some improvements possible |
+| 60-69 | Fair | 🟡 | Moderate consistency, needs refinement |
+| 50-59 | Poor | 🔴 | Low consistency, significant issues |
+| 0-49 | Very Poor | 🔴 | Major inconsistencies, requires substantial work |
 
-### 身份一致性  
-- **评分范围**: 0.0 - 1.0
-- **推荐阈值**: ≥ 0.6
-- **权重**: 25%
-- **技术**: FaceNet + MTCNN
-- **用途**: 评估人物身份的保持程度
+### Individual Metric Thresholds
 
-### 感知相似度
-- **评分范围**: 0.0 - 1.0 (LPIPS距离: 0.0 - 1.0)
-- **推荐阈值**: 距离 ≤ 0.3
-- **权重**: 25%
-- **技术**: LPIPS (AlexNet/VGG)
-- **用途**: 基于人类视觉感知的相似度评估
+| Metric | Excellent (≥) | Good (≥) | Fair (≥) | Poor (<) |
+|--------|---------------|----------|----------|----------|
+| CLIP Similarity | 0.850 | 0.700 | 0.500 | 0.500 |
+| Identity Similarity | 0.800 | 0.600 | 0.400 | 0.400 |
+| LPIPS Distance | ≤ 0.200 | ≤ 0.300 | ≤ 0.500 | > 0.500 |
+| SSIM | 0.900 | 0.800 | 0.600 | < 0.600 |
+| PSNR (dB) | 25+ | 20+ | 15+ | < 15 |
 
-### 传统图像质量指标
-- **SSIM**: 结构相似性指数 (0.0 - 1.0, 阈值 ≥ 0.8)
-- **PSNR**: 峰值信噪比 (dB, 阈值 ≥ 20)
-- **MSE**: 均方误差
-- **MAE**: 平均绝对误差
+## 🔧 Configuration & Customization
 
-## 🎯 适用场景
+### Hardware Optimization
 
-- 🎨 **AI艺术生成**: 评估Stable Diffusion、DALL-E等模型生成质量
-- 👤 **人像生成**: 检验人脸生成的身份一致性和质量
-- 🖼️ **图像编辑**: 评估图像修复、风格迁移等编辑效果
-- 🔬 **学术研究**: 为图像生成研究提供客观评估工具
-- 🏭 **工业应用**: 产品图像生成的质量控制
-- 📚 **数据集评估**: 大规模图像数据集的质量筛选
+The system automatically detects and optimizes for your hardware:
 
-## ⚙️ 系统要求
+```python
+# CPU optimization (automatic)
+- Uses CPU-only processing for compatibility
+- Implements timeout protection for model loading
+- Optimized thread management for integrated graphics
 
-- **Python**: 3.7+
-- **内存**: 8GB+ (推荐16GB)
-- **显卡**: 可选，NVIDIA GPU with CUDA支持
-- **存储**: 5GB+ 可用空间
-- **网络**: 首次运行需要下载模型
-
-## 🛠️ 高级配置
-
-### 自定义配置
-
-编辑 `config.yaml` 文件自定义系统行为：
-
-```yaml
-# 调整评估权重
-metric_weights:
-  clip_similarity: 0.30
-  identity_similarity: 0.25
-  lpips_similarity: 0.25
-  ssim_similarity: 0.10
-  psnr_similarity: 0.10
-
-# 设置评估阈值
-thresholds:
-  clip_threshold: 0.70
-  identity_threshold: 0.60
-  lpips_threshold: 0.30
+# Memory management
+- Automatic image resizing for memory efficiency
+- Garbage collection after heavy operations
+- Batch processing limits to prevent OOM errors
 ```
 
-### GPU加速
+### Custom Weight Configuration
+
+You can modify the scoring weights by editing `launch_simple_amd.py`:
+
+```python
+# Locate the scoring section and adjust weights
+def calculate_final_score(results):
+    # Customize these weights based on your priorities
+    CLIP_WEIGHT = 0.40        # Increase for semantic focus
+    IDENTITY_WEIGHT = 0.30    # Increase for face recognition priority
+    LPIPS_WEIGHT = 0.20       # Perceptual similarity weight
+    TRADITIONAL_WEIGHT = 0.10 # Traditional metrics weight
+    
+    # Weights must sum to 1.0
+    assert CLIP_WEIGHT + IDENTITY_WEIGHT + LPIPS_WEIGHT + TRADITIONAL_WEIGHT == 1.0
+```
+
+## 📊 Performance Benchmarks
+
+### Processing Times (AMD 780M System)
+
+| Operation | Time Range | Factors |
+|-----------|------------|---------|
+| CLIP Analysis | 3-8 seconds | Image size, prompt complexity |
+| LPIPS Calculation | 2-5 seconds | Image resolution, model warmup |
+| Face Recognition | 5-12 seconds | Number of faces, detection complexity |
+| Traditional Metrics | 1-2 seconds | Image size only |
+| **Total Evaluation** | **8-15 seconds** | Combined processing |
+
+### Memory Usage
+
+| Component | RAM Usage | Notes |
+|-----------|-----------|--------|
+| Base System | ~2GB | Python environment, basic libraries |
+| CLIP Model | ~1.5GB | ViT-B/32 model in memory |
+| LPIPS Model | ~500MB | AlexNet-based network |
+| DeepFace Models | ~1GB | Multiple face recognition models |
+| **Peak Usage** | **~5GB** | During simultaneous model usage |
+
+## 🛠️ Troubleshooting
+
+### Common Issues and Solutions
+
+**1. Model Loading Timeouts**
+```bash
+# Solution: Increase timeout values or check internet connection
+# Models are downloaded automatically on first use
+```
+
+**2. Memory Errors**
+```bash
+# Solution: Reduce image resolution or restart the application
+# Large images (>2048px) are automatically resized
+```
+
+**3. Face Detection Failures**
+```bash
+# Solution: Ensure images contain clear, frontal faces
+# The system includes fallback methods for difficult cases
+```
+
+**4. CUDA/GPU Related Errors**
+```bash
+# Solution: The system is designed for CPU-only operation
+# GPU acceleration is not required and may cause conflicts
+```
+
+### Debug Mode
+
+Enable detailed logging for troubleshooting:
+
+```python
+# Add this to the top of launch_simple_amd.py
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Run with verbose output
+python launch_simple_amd.py --debug
+```
+
+## 🔬 Technical Specifications
+
+### Algorithm Implementation Details
+
+**CLIP Integration:**
+- Model: `openai/clip-vit-base-patch32`
+- Image preprocessing: 224x224 resize, normalization
+- Text encoding: Tokenization with 77-token limit
+- Similarity: Cosine similarity between image and text embeddings
+
+**LPIPS Implementation:**
+- Network: AlexNet-based perceptual loss
+- Preprocessing: Standard ImageNet normalization
+- Output: Perceptual distance (0=identical, 1=completely different)
+- Hardware: CPU-optimized implementation
+
+**DeepFace Configuration:**
+- Models: VGG-Face, FaceNet, OpenFace, DeepFace
+- Backend: TensorFlow 2.20.0
+- Detection: MTCNN for face detection
+- Verification: Cosine similarity with model-specific thresholds
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Gradio Web Interface                     │
+├─────────────────────────────────────────────────────────────┤
+│                 launch_simple_amd.py                        │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
+│  │ Result Formatting│ │ UI Management   │ │ Error Handling│  │
+│  └─────────────────┘ └─────────────────┘ └───────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│              compatible_evaluation_system.py                │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
+│  │ CLIP Analysis   │ │ LPIPS Metrics   │ │ Traditional CV│  │
+│  └─────────────────┘ └─────────────────┘ └───────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│           professional_identity_evaluator.py               │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
+│  │ DeepFace Models │ │ Fallback Methods│ │ Consensus Alg.│  │
+│  └─────────────────┘ └─────────────────┘ └───────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 📚 Research Applications
+
+This system is particularly valuable for:
+
+- **Academic Research**: Quantitative evaluation of generative models
+- **AI Art Creation**: Quality assessment for character consistency
+- **Commercial Applications**: Automated quality control for generated content
+- **Dataset Validation**: Large-scale image dataset quality assessment
+- **Model Development**: Benchmarking and comparison of different generation approaches
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/new-algorithm`)
+3. **Implement** your changes with proper documentation
+4. **Test** thoroughly on different hardware configurations
+5. **Submit** a pull request with detailed description
+
+### Development Setup
 
 ```bash
-# 检查CUDA可用性
-python -c "import torch; print(torch.cuda.is_available())"
+# Clone for development
+git clone https://github.com/zhangxinb/Evaluation-System.git
+cd Evaluation-System
 
-# 安装CUDA版本PyTorch
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-```
+# Install in development mode
+pip install -e .
 
-## 📊 性能基准
-
-| 配置 | 单图评估时间 | 批量处理能力 | 内存使用 |
-|------|-------------|-------------|----------|
-| CPU (Intel i7) | ~15秒 | 10图像/分钟 | ~4GB |
-| GPU (RTX 3080) | ~5秒 | 30图像/分钟 | ~6GB |
-| GPU (RTX 4090) | ~3秒 | 50图像/分钟 | ~8GB |
-
-## 🔧 故障排除
-
-### 常见问题
-
-**Q: CUDA内存不足**
-```bash
-A: 降低图像分辨率或使用CPU模式
-export CUDA_VISIBLE_DEVICES=""
-```
-
-**Q: 模型下载失败**
-```bash
-A: 检查网络连接，或使用镜像源
-pip install -i https://pypi.tuna.tsinghua.edu.cn/simple package_name
-```
-
-**Q: 人脸检测失败**
-```bash
-A: 确保图像包含清晰的人脸，调整检测阈值
-```
-
-详细故障排除指南请查看 [USER_MANUAL.md](USER_MANUAL.md)
-
-## 🤝 贡献指南
-
-我们欢迎社区贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
-
-### 开发环境设置
-
-```bash
-# 克隆仓库
-git clone <repository-url>
-cd evaluation-system
-
-# 创建开发环境
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 安装开发依赖
-pip install -r requirements-dev.txt
-
-# 运行测试
+# Run tests (when available)
 python -m pytest tests/
 ```
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-- [OpenAI CLIP](https://github.com/openai/CLIP) - 语义一致性评估
-- [LPIPS](https://github.com/richzhang/PerceptualSimilarity) - 感知相似度评估  
-- [FaceNet PyTorch](https://github.com/timesler/facenet-pytorch) - 人脸识别
-- [Gradio](https://gradio.app/) - Web界面框架
-- [Scikit-Image](https://scikit-image.org/) - 传统图像指标
+- **OpenAI CLIP**: Revolutionary vision-language understanding
+- **LPIPS**: Human-aligned perceptual similarity metrics
+- **DeepFace**: Comprehensive face recognition framework
+- **Gradio**: Elegant web interface framework
+- **TensorFlow & PyTorch**: Deep learning framework foundations
 
-## 📞 支持与联系
+## 📞 Support & Contact
 
-- 📧 **邮箱**: [contact@example.com](mailto:contact@example.com)
-- 💬 **讨论**: GitHub Discussions
-- 🐛 **问题报告**: GitHub Issues
-- 📚 **文档**: [完整文档](https://docs.example.com)
+- **Issues**: [GitHub Issues](https://github.com/zhangxinb/Evaluation-System/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/zhangxinb/Evaluation-System/discussions)
+- **Documentation**: This README and inline code documentation
 
 ---
 
-如果这个项目对您有帮助，请给我们一个 ⭐ star！
+⭐ **Star this repository** if you find it useful for your research or projects!
+
+**Professional Image Evaluation System** - Advancing the science of AI-generated image quality assessment.
