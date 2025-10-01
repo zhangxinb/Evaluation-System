@@ -24,170 +24,87 @@ def format_segmented_results(results, use_advanced_algorithms, img1_np, img2_np)
         return format_fallback_results(results, img1_np, img2_np)
 
 def format_advanced_results(results, img1_np, img2_np):
-    """Format results for advanced algorithm mode with clear segmentation - English version"""
+    """Format results for advanced algorithm mode - Clean and readable"""
     
     final_score = results.get('Final_Score', 0.0)
     consistency_level = results.get('Consistency_Level', 'Unknown')
-    color_indicator = results.get('Assessment_Color', '⚪')
     interpretation = results.get('Interpretation', 'No assessment available')
-    methods_used = results.get('Methods_Used', 'Unknown')
     
-    # Start with main header
-    result_text = "\n" + "="*80 + "\n"
-    result_text += "🚀 Professional Character Consistency Analysis Report\n"
-    result_text += "="*80 + "\n\n"
+    # Start with clean header
+    result_text = "\n" + "="*70 + "\n"
+    result_text += "Character Consistency Analysis Report\n"
+    result_text += "="*70 + "\n\n"
     
-    # Section 1: Executive Summary
-    result_text += "📋 Section 1: Executive Summary\n"
-    result_text += "─"*40 + "\n"
-    result_text += f"{color_indicator} Overall Assessment: {consistency_level}\n"
-    result_text += f"📊 Consistency Score: {final_score:.3f} / 1.000\n"
-    result_text += f"🎯 Confidence Level: {results.get('Overall_Confidence', 0.0):.3f}\n"
-    result_text += f"🔬 Analysis Methods: {methods_used}\n"
-    result_text += f"💬 Professional Interpretation: {interpretation}\n\n"
+    # Overall Assessment
+    result_text += "OVERALL ASSESSMENT\n"
+    result_text += "-"*70 + "\n"
+    result_text += f"Final Score:    {final_score:.3f} / 1.000\n"
+    result_text += f"Level:          {consistency_level}\n"
+    result_text += f"Interpretation: {interpretation}\n"
+    result_text += f"Confidence:     {results.get('Overall_Confidence', 0.0):.3f}\n\n"
     
-    # Section 2: Score Reference Guide
-    result_text += "📖 Section 2: Score Reference Guide\n"
-    result_text += "─"*40 + "\n"
-    result_text += "🟢 0.8-1.0: Excellent consistency\n"
-    result_text += "🟡 0.6-0.8: Good consistency\n"
-    result_text += "🟠 0.4-0.6: Moderate consistency\n"
-    result_text += "🔴 0.2-0.4: Low consistency\n"
-    result_text += "⚫ 0.0-0.2: Very low consistency\n\n"
+    # Score Reference
+    result_text += "SCORE REFERENCE\n"
+    result_text += "-"*70 + "\n"
+    result_text += "0.80 - 1.00  Excellent consistency\n"
+    result_text += "0.60 - 0.80  Good consistency\n"
+    result_text += "0.40 - 0.60  Moderate consistency\n"
+    result_text += "0.20 - 0.40  Low consistency\n"
+    result_text += "0.00 - 0.20  Very low consistency\n\n"
     
-    # Section 3: Advanced Algorithm Analysis
-    result_text += "🔬 Section 3: Advanced Algorithm Analysis\n"
-    result_text += "─"*45 + "\n"
+    # Algorithm Results
+    result_text += "ALGORITHM RESULTS\n"
+    result_text += "-"*70 + "\n"
     
     # Identity Analysis
     if 'Identity_Similarity' in results:
         identity_score = results['Identity_Similarity']
-        models_used = results.get('Models_Used', 0)
         identity_decision = results.get('Identity_Decision', 'Unknown')
+        models_used = results.get('Models_Used', 0)
         
-        # Color coding for identity score
-        if identity_score >= 0.6:
-            identity_icon = "✅"
-        elif identity_score >= 0.4:
-            identity_icon = "⚠️"
-        else:
-            identity_icon = "❌"
-            
-        result_text += f"👤 Face Identity Recognition\n"
-        result_text += "   " + "━"*30 + "\n"
-        result_text += f"   {identity_icon} Identity Similarity: {identity_score:.4f}\n"
-        result_text += f"   🧠 Models Used: {models_used} deep learning models\n"
-        result_text += f"   🎯 Identity Decision: {identity_decision}\n"
-        result_text += f"   📈 Algorithm: Multi-model Consensus Voting\n\n"
+        result_text += f"Face Identity Recognition:\n"
+        result_text += f"  Similarity:  {identity_score:.4f}\n"
+        result_text += f"  Decision:    {identity_decision}\n"
+        result_text += f"  Models:      {models_used} deep learning models\n\n"
     
     # CLIP Analysis
     if 'CLIP_Similarity' in results:
         clip_score = results['CLIP_Similarity']
-        
-        # Color coding for CLIP score
-        if clip_score >= 0.7:
-            clip_icon = "🟢"
-        elif clip_score >= 0.5:
-            clip_icon = "🟡"
-        else:
-            clip_icon = "🔴"
-            
-        result_text += f"🎯 CLIP Vision-Language Analysis\n"
-        result_text += "   " + "━"*35 + "\n"
-        result_text += f"   {clip_icon} Semantic Similarity: {clip_score:.4f}\n"
-        result_text += f"   🧠 Model Architecture: Vision Transformer (ViT-B/32)\n"
-        result_text += f"   📚 Analysis Level: Semantic-level understanding\n"
-        result_text += f"   💡 Feature: Cross-modal vision-language understanding\n\n"
+        result_text += f"CLIP Vision Analysis:\n"
+        result_text += f"  Similarity:  {clip_score:.4f}\n"
+        result_text += f"  Model:       Vision Transformer (ViT-B/32)\n\n"
     
-    # Perceptual Analysis
+    # LPIPS Analysis
     if 'LPIPS_Similarity' in results:
         lpips_score = results['LPIPS_Similarity']
-        
-        # Color coding for LPIPS score
-        if lpips_score >= 0.6:
-            lpips_icon = "👁️"
-        elif lpips_score >= 0.4:
-            lpips_icon = "👀"
-        else:
-            lpips_icon = "😵"
-            
-        result_text += f"👁️ LPIPS Learned Perceptual Similarity\n"
-        result_text += "   " + "━"*40 + "\n"
-        result_text += f"   {lpips_icon} Perceptual Similarity: {lpips_score:.4f}\n"
-        result_text += f"   🧠 Neural Network: AlexNet Perceptual Model\n"
-        result_text += f"   👥 Evaluation Standard: Human visual perception aligned\n"
-        result_text += f"   🎯 Advantage: More accurate than traditional SSIM\n\n"
+        result_text += f"LPIPS Perceptual Analysis:\n"
+        result_text += f"  Similarity:  {lpips_score:.4f}\n"
+        result_text += f"  Network:     AlexNet Perceptual Model\n\n"
     
-    # Section 4: Traditional Image Quality Metrics
-    result_text += "📊 Section 4: Traditional Image Quality Metrics\n"
-    result_text += "─"*50 + "\n"
+    # Traditional Metrics
+    result_text += "TRADITIONAL METRICS\n"
+    result_text += "-"*70 + "\n"
     
     if 'SSIM' in results:
         ssim_score = results['SSIM']
-        ssim_icon = "🟢" if ssim_score >= 0.7 else "🟡" if ssim_score >= 0.4 else "🔴"
-        result_text += f"{ssim_icon} Structural Similarity Index (SSIM): {ssim_score:.4f}\n"
-        result_text += f"     └─ Evaluates: Luminance, contrast, structural similarity\n"
+        result_text += f"SSIM (Structural Similarity):    {ssim_score:.4f}\n"
         
     if 'PSNR' in results:
         psnr_score = results['PSNR']
-        psnr_icon = "📶" if psnr_score >= 25 else "📵" if psnr_score >= 15 else "📴"
-        result_text += f"{psnr_icon} Peak Signal-to-Noise Ratio (PSNR): {psnr_score:.2f} dB\n"
-        result_text += f"     └─ Evaluates: Image signal quality (higher is better)\n"
+        result_text += f"PSNR (Peak Signal-to-Noise):     {psnr_score:.2f} dB\n"
         
     if 'MSE' in results:
         mse_score = results['MSE']
-        mse_icon = "✅" if mse_score <= 100 else "⚠️" if mse_score <= 1000 else "❌"
-        result_text += f"{mse_icon} Mean Squared Error (MSE): {mse_score:.2f}\n"
-        result_text += f"     └─ Evaluates: Pixel-level differences (lower is better)\n"
+        result_text += f"MSE (Mean Squared Error):        {mse_score:.2f}\n"
         
     if 'Histogram_Similarity' in results:
         hist_score = results['Histogram_Similarity']
-        hist_icon = "🎨" if hist_score >= 0.5 else "🎭" if hist_score >= 0.2 else "🖤"
-        result_text += f"{hist_icon} Color Histogram Correlation: {hist_score:.4f}\n"
-        result_text += f"     └─ Evaluates: Color distribution similarity\n"
+        result_text += f"Histogram Correlation:           {hist_score:.4f}\n"
     
     result_text += "\n"
-    
-    # Section 5: Professional Recommendations
-    result_text += "💡 Section 5: Professional Recommendations\n"
-    result_text += "─"*45 + "\n"
-    
-    if final_score >= 0.8:
-        result_text += "✅ Excellent character consistency - safe to use\n"
-        result_text += "✅ High algorithm consensus - very reliable results\n"
-        result_text += "✅ Recommended for high-consistency requirement applications\n"
-    elif final_score >= 0.6:
-        result_text += "🟡 Good character consistency - minor variations acceptable\n"
-        result_text += "🟡 Manual review recommended for specific requirements\n"
-        result_text += "🟡 Suitable for most standard application scenarios\n"
-    elif final_score >= 0.4:
-        result_text += "⚠️ Moderate character consistency - some differences exist\n"
-        result_text += "⚠️ Strong manual review recommended, focus on key features\n"
-        result_text += "⚠️ Use with caution, consider further optimization\n"
-    elif final_score >= 0.2:
-        result_text += "🔴 Poor character consistency - likely different characters\n"
-        result_text += "🔴 Recommend reconsidering or using alternative images\n"
-        result_text += "🔴 Not recommended for strict applications\n"
-    else:
-        result_text += "❌ Very poor character consistency - clearly different characters\n"
-        result_text += "❌ Not recommended for consistency-required applications\n"
-        result_text += "❌ Strongly recommend using different image pairs\n"
-    
-    result_text += "\n"
-    
-    # Section 6: Technical Information
-    result_text += "⚙️ Section 6: Technical Information\n"
-    result_text += "─"*40 + "\n"
-    result_text += f"📸 Image Dimensions: {img1_np.shape[1]} × {img1_np.shape[0]} pixels\n"
-    result_text += f"🔧 Processing Mode: Enhanced Multi-Algorithm System\n"
-    result_text += f"🧮 Detection Method: {results.get('Detection_Method', 'Unknown')}\n"
-    result_text += f"💻 Hardware Optimization: CPU + Integrated Graphics Adapted\n"
-    result_text += f"📊 Analysis Time: {img1_np.shape[0] * img1_np.shape[1] / 100000:.1f}s (estimated)\n"
-    result_text += f"🎯 Algorithm Version: Advanced Character Consistency v2.0\n\n"
-    
-    result_text += "="*80 + "\n"
-    result_text += "📄 Report Generation Complete\n"
-    result_text += "="*80 + "\n"
+    result_text += "="*70 + "\n"
+    result_text += "Report Complete\n"
+    result_text += "="*70 + "\n"
     
     return result_text
 
@@ -360,58 +277,31 @@ def main():
                 
                 print(f"📊 Processing images: {img1_np.shape} vs {img2_np.shape}")
                 
-                # Smart preprocessing: preserve face details
-                def smart_preprocess(img, max_size=512):
+                # Simplified preprocessing: just resize if too large
+                # Let face_recognition.py handle all face detection
+                def simple_resize(img, max_size=1024):
                     """
-                    Intelligent preprocessing that preserves important regions
-                    1. If image is small enough, keep original
-                    2. If face detected, crop and resize to preserve face
-                    3. Otherwise, proportional resize
+                    Simple proportional resize without face detection
+                    Face detection will be handled by the professional face_recognition module
                     """
                     if max(img.shape[:2]) <= max_size:
+                        print(f"   ℹ️ Image size OK, no resize needed")
                         return img
                     
-                    try:
-                        # Try to detect face
-                        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) if len(img.shape) == 3 else img
-                        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-                        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-                        
-                        if len(faces) > 0:
-                            # Face detected, crop with context
-                            (x, y, w, h) = max(faces, key=lambda f: f[2] * f[3])
-                            
-                            # Add generous padding (50% of face size)
-                            padding = int(max(w, h) * 0.5)
-                            x1 = max(0, x - padding)
-                            y1 = max(0, y - padding)
-                            x2 = min(img.shape[1], x + w + padding)
-                            y2 = min(img.shape[0], y + h + padding)
-                            
-                            # Crop face region
-                            face_region = img[y1:y2, x1:x2]
-                            
-                            # Resize while preserving aspect ratio
-                            h_crop, w_crop = face_region.shape[:2]
-                            if max(h_crop, w_crop) > max_size:
-                                scale = max_size / max(h_crop, w_crop)
-                                new_w = int(w_crop * scale)
-                                new_h = int(h_crop * scale)
-                                return cv2.resize(face_region, (new_w, new_h))
-                            return face_region
-                    except:
-                        pass
-                    
-                    # No face or error, do proportional resize
+                    # Proportional resize only
                     scale = max_size / max(img.shape[:2])
                     new_height = int(img.shape[0] * scale)
                     new_width = int(img.shape[1] * scale)
-                    return cv2.resize(img, (new_width, new_height))
+                    resized = cv2.resize(img, (new_width, new_height))
+                    print(f"   📐 Resized from {img.shape[:2]} to {resized.shape[:2]}")
+                    return resized
                 
-                # Apply smart preprocessing
-                img1_np = smart_preprocess(img1_np)
-                img2_np = smart_preprocess(img2_np)
+                # Apply simple preprocessing (no face detection here)
+                print("🔧 Preprocessing images...")
+                img1_np = simple_resize(img1_np)
+                img2_np = simple_resize(img2_np)
                 print(f"📊 After preprocessing: {img1_np.shape} vs {img2_np.shape}")
+                print("   ➡️ Face detection will be handled by professional module")
                 
                 # Run evaluation
                 print("🔬 Running character consistency analysis...")
