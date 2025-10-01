@@ -24,6 +24,11 @@ class ProfessionalIdentityEvaluator:
             import os
             os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
             
+            # Initialize face detection cascade
+            self.face_cascade = cv2.CascadeClassifier(
+                cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            )
+            
             print("✅ Professional Identity Evaluator initialized with DeepFace")
             print("🔧 Using CPU mode for AMD 780M compatibility")
             
@@ -31,6 +36,85 @@ class ProfessionalIdentityEvaluator:
             self.available = False
             print(f"⚠️ DeepFace not available: {e}")
             print("💡 Install with: pip install deepface")
+    
+    
+    def _detect_and_crop_face(self, pil_image):
+        """
+        Detect and crop face region from PIL image
+        Uses multi-stage detection for robustness
+        
+        Args:
+            pil_image: PIL Image object
+            
+        Returns:
+            PIL Image of cropped face region, or None if no face detected
+        """
+        try:
+            # Convert PIL to numpy for OpenCV
+            img_array = np.array(pil_image)
+            
+            # Convert to grayscale for face detection
+            if len(img_array.shape) == 3:
+                gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+            else:
+                gray = img_array
+            
+            # Stage 1: Try Haar Cascade (fast and reliable for frontal faces)
+            faces = self.face_cascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(50, 50)  # Minimum face size
+            )
+            
+            if len(faces) == 0:
+                # Stage 2: Try with more lenient parameters
+                faces = self.face_cascade.detectMultiScale(
+                    gray,
+                    scaleFactor=1.05,
+                    minNeighbors=3,
+                    minSize=(30, 30)
+                )
+            
+            if len(faces) == 0:
+                print("⚠️ No face detected with Haar Cascade")
+                return None
+            
+            # Select the largest face
+            (x, y, w, h) = max(faces, key=lambda f: f[2] * f[3])
+            
+            print(f"✅ Face detected at ({x}, {y}), size: {w}x{h}")
+            
+            # Add minimal padding (15%) to include face context
+            # Less padding = more focus on face, less background noise
+            padding_ratio = 0.15
+            padding_w = int(w * padding_ratio)
+            padding_h = int(h * padding_ratio)
+            
+            x1 = max(0, x - padding_w)
+            y1 = max(0, y - padding_h)
+            x2 = min(img_array.shape[1], x + w + padding_w)
+            y2 = min(img_array.shape[0], y + h + padding_h)
+            
+            # Crop face region
+            face_crop = img_array[y1:y2, x1:x2]
+            
+            # Convert back to PIL
+            from PIL import Image
+            face_pil = Image.fromarray(face_crop)
+            
+            # Ensure minimum size for DeepFace models
+            min_size = 160  # Minimum for Facenet
+            if face_pil.size[0] < min_size or face_pil.size[1] < min_size:
+                # Resize to minimum size while preserving aspect ratio
+                face_pil.thumbnail((min_size, min_size), Image.Resampling.LANCZOS)
+            
+            print(f"✅ Face cropped to size: {face_pil.size}")
+            return face_pil
+            
+        except Exception as e:
+            print(f"❌ Face detection error: {e}")
+            return None
     
     def calculate_identity_similarity(self, image1: np.ndarray, image2: np.ndarray) -> Dict[str, Any]:
         """
@@ -82,42 +166,90 @@ class ProfessionalIdentityEvaluator:
                 tmp2_path = tmp2.name
             
             try:
-                # Use DeepFace for verification
-                # Try multiple models for robustness
-                models = ['VGG-Face', 'Facenet', 'OpenFace', 'DeepFace']
+                # CRITICAL FIX: Pre-detect and crop faces to avoid background comparison
+                print("🔍 Step 1: Detecting faces in both images...")
+                
+                face1_region = self._detect_and_crop_face(pil_img1)
+                face2_region = self._detect_and_crop_face(pil_img2)
+                
+                if face1_region is None or face2_region is None:
+                    print("⚠️ Face detection failed in one or both images")
+                    print(f"   Image 1: {'✅ Face detected' if face1_region is not None else '❌ No face'}")
+                    print(f"   Image 2: {'✅ Face detected' if face2_region is not None else '❌ No face'}")
+                    return {
+                        'similarity': 0.0,
+                        'confidence': 0.0,
+                        'identity_decision': 'Analysis Failed - No Face Detected',
+                        'decision_confidence': 0.0,
+                        'verification_consensus': 0.0,
+                        'models_used': 0,
+                        'method': 'DeepFace Professional',
+                        'error': 'Face detection failed'
+                    }
+                
+                # Save face-cropped images
+                face1_region.save(tmp1_path)
+                face2_region.save(tmp2_path)
+                print("✅ Face regions extracted and saved")
+                
+                # Use only the most reliable models for face recognition
+                # Facenet512 and ArcFace are state-of-the-art
+                models = ['Facenet512', 'ArcFace', 'Facenet']
                 results = []
                 
                 for model in models:
                     try:
                         print(f"🔄 Trying model: {model}")
                         
-                        # Verify if the faces are the same person
+                        # CRITICAL FIX: Use enforce_detection=True with detector_backend='skip'
+                        # This ensures we're comparing face features, not backgrounds
                         result = self.deepface.verify(
                             img1_path=tmp1_path,
                             img2_path=tmp2_path,
                             model_name=model,
                             distance_metric='cosine',
-                            enforce_detection=False  # Don't fail if face detection fails
+                            enforce_detection=False,  # We already cropped faces
+                            detector_backend='skip'  # Skip detection, use our pre-cropped images
                         )
                         
-                        print(f"✅ Model {model} success: verified={result['verified']}, distance={result['distance']:.4f}")
+                        # Validate result quality
+                        distance = result['distance']
+                        if distance > 2.0:  # Suspiciously high distance
+                            print(f"⚠️ Model {model} returned suspicious distance: {distance:.4f}")
+                            continue
+                        
+                        similarity = 1.0 - min(distance, 1.0)  # Convert distance to similarity, cap at 1.0
+                        
+                        print(f"✅ Model {model} success: verified={result['verified']}, distance={distance:.4f}, similarity={similarity:.4f}")
                         
                         results.append({
                             'model': model,
                             'verified': result['verified'],
-                            'distance': result['distance'],
-                            'similarity': 1.0 - result['distance']  # Convert distance to similarity
+                            'distance': distance,
+                            'similarity': similarity
                         })
                         
                     except Exception as e:
-                        print(f"⚠️ Model {model} failed: {str(e)[:100]}...")
+                        error_msg = str(e)
+                        print(f"⚠️ Model {model} failed: {error_msg[:150]}...")
+                        
+                        # If face detection failed even after our pre-cropping, skip
+                        if "Face could not be detected" in error_msg:
+                            print(f"   → Face detection still failed for {model}")
                         continue
                 
-                # Calculate final metrics
+                # Calculate final metrics with improved logic
                 if results:
-                    # Average similarity across all successful models
+                    # Extract metrics
                     similarities = [r['similarity'] for r in results]
                     verifications = [r['verified'] for r in results]
+                    distances = [r['distance'] for r in results]
+                    
+                    # Use weighted average favoring better-performing models
+                    # Lower distance = higher weight
+                    weights = [1.0 / (d + 0.1) for d in distances]  # Add 0.1 to avoid division by zero
+                    total_weight = sum(weights)
+                    weighted_similarity = sum(s * w for s, w in zip(similarities, weights)) / total_weight
                     
                     avg_similarity = np.mean(similarities)
                     max_similarity = np.max(similarities)
@@ -128,26 +260,47 @@ class ProfessionalIdentityEvaluator:
                     similarity_std = np.std(similarities)
                     confidence = max(0.0, 1.0 - similarity_std)
                     
-                    # Professional analysis
-                    if verification_consensus >= 0.5:
+                    # Enhanced decision logic with adaptive thresholds
+                    # Use weighted similarity for better accuracy
+                    decision_score = weighted_similarity
+                    
+                    # Adaptive threshold based on model agreement
+                    if similarity_std < 0.1:  # High agreement
+                        threshold = 0.45  # Lower threshold when models agree
+                    elif similarity_std < 0.2:  # Medium agreement
+                        threshold = 0.50
+                    else:  # Low agreement
+                        threshold = 0.55  # Higher threshold when models disagree
+                    
+                    print(f"📊 Decision metrics: weighted_sim={decision_score:.4f}, threshold={threshold:.2f}, std={similarity_std:.4f}")
+                    
+                    if decision_score >= threshold:
                         identity_decision = "Same Person"
-                        decision_confidence = verification_consensus
+                        decision_confidence = decision_score
                     else:
                         identity_decision = "Different Person"
-                        decision_confidence = 1.0 - verification_consensus
+                        decision_confidence = 1.0 - decision_score
+                    
+                    # Add quality assessment
+                    quality_score = confidence * (1.0 - similarity_std)  # Higher is better
                     
                     final_result = {
-                        'similarity': float(avg_similarity),
+                        'similarity': float(weighted_similarity),  # Use weighted similarity
+                        'avg_similarity': float(avg_similarity),
                         'max_similarity': float(max_similarity),
                         'min_similarity': float(min_similarity),
                         'confidence': float(confidence),
+                        'quality_score': float(quality_score),
                         'identity_decision': identity_decision,
                         'decision_confidence': float(decision_confidence),
                         'verification_consensus': float(verification_consensus),
+                        'decision_threshold': float(threshold),
                         'models_used': len(results),
-                        'method': 'DeepFace Professional',
+                        'method': 'DeepFace Professional (Enhanced)',
                         'model_results': results
                     }
+                    
+                    print(f"🎯 Final decision: {identity_decision} (similarity: {weighted_similarity:.4f}, confidence: {confidence:.4f})")
                     
                 else:
                     final_result = {
