@@ -412,6 +412,7 @@ python launch_simple_amd.py --debug
 ```
 ### Dashboard Architecture
 
+```
 ┌─────────────────────────────────────────────────────┐
 │          Character Consistency Evaluation           │             
 ├─────────────────────────────────────────────────────┤
@@ -434,6 +435,8 @@ python launch_simple_amd.py --debug
 │  - LPIPS perceptual similarity                      │
 │  - Traditional metrics (SSIM, PSNR, MSE)            │
 └─────────────────────────────────────────────────────┘
+
+```
 
 ## 📚 Research Applications
 
