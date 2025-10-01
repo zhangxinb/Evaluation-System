@@ -391,24 +391,49 @@ python launch_simple_amd.py --debug
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Gradio Web Interface                     │
+│                        Web Interface                        │
 ├─────────────────────────────────────────────────────────────┤
-│                 launch_simple_amd.py                        │
+│                           app.py                            │
 │  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
-│  │ Result Formatting│ │ UI Management   │ │ Error Handling│  │
+│  │Result Formatting│ │ UI Management   │ │ Error Handling│  │
 │  └─────────────────┘ └─────────────────┘ └───────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
-│              compatible_evaluation_system.py                │
+│                           evaluator.py                      │
 │  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
 │  │ CLIP Analysis   │ │ LPIPS Metrics   │ │ Traditional CV│  │
 │  └─────────────────┘ └─────────────────┘ └───────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
-│           professional_identity_evaluator.py               │
+│                      face_recognition.py                    │
 │  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
 │  │ DeepFace Models │ │ Fallback Methods│ │ Consensus Alg.│  │
 │  └─────────────────┘ └─────────────────┘ └───────────────┘  │
 └─────────────────────────────────────────────────────────────┘
+
 ```
+### Dashboard Architecture
+
+┌─────────────────────────────────────────────────────┐
+│          Character Consistency Evaluation           │             
+├─────────────────────────────────────────────────────┤
+│    Reference Image    │    Target Image             │
+│    [Upload area]      │    [Upload area]            │
+├─────────────────────────────────────────────────────┤
+│                  [ Analyze ]                        │
+├─────────────────────────────────────────────────────┤
+│  Results                                            │
+│  [Text output area]                                 │
+├─────────────────────────────────────────────────────┤
+│  Usage:                                             │
+│  1. Upload reference image (left)                   │
+│  2. Upload target image (right)                     │
+│  3. Click Analyze                                   │
+│                                                     │
+│  Analysis Methods:                                  │
+│  - Multi-model face recognition                     │
+│  - CLIP semantic similarity                         │
+│  - LPIPS perceptual similarity                      │
+│  - Traditional metrics (SSIM, PSNR, MSE)            │
+└─────────────────────────────────────────────────────┘
 
 ## 📚 Research Applications
 
