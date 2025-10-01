@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Professional Identity Evaluator using DeepFace
-AMD 780M Optimized Version
-"""
 
 import cv2
 import numpy as np
@@ -194,10 +190,60 @@ class ProfessionalIdentityEvaluator:
             gray1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY) if len(image1.shape) == 3 else image1
             gray2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY) if len(image2.shape) == 3 else image2
             
-            # Resize images to same size for comparison
+            # Smart face detection and cropping
+            def smart_face_crop(gray_img, target_size=224):
+                """
+                Detect and crop face region intelligently
+                If no face detected, use center crop with padding
+                """
+                try:
+                    # Try to detect face using Haar Cascade
+                    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+                    faces = face_cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+                    
+                    if len(faces) > 0:
+                        # Use the largest detected face
+                        (x, y, w, h) = max(faces, key=lambda f: f[2] * f[3])
+                        
+                        # Add 30% padding around face
+                        padding = int(max(w, h) * 0.3)
+                        x1 = max(0, x - padding)
+                        y1 = max(0, y - padding)
+                        x2 = min(gray_img.shape[1], x + w + padding)
+                        y2 = min(gray_img.shape[0], y + h + padding)
+                        
+                        # Crop face region
+                        face_crop = gray_img[y1:y2, x1:x2]
+                        
+                        # Resize to target size
+                        return cv2.resize(face_crop, (target_size, target_size))
+                    else:
+                        # No face detected, use intelligent center crop
+                        h, w = gray_img.shape
+                        
+                        # Calculate center crop that preserves aspect ratio
+                        if h > w:
+                            # Portrait orientation
+                            crop_size = w
+                            start_y = (h - w) // 2
+                            cropped = gray_img[start_y:start_y + crop_size, 0:w]
+                        else:
+                            # Landscape orientation
+                            crop_size = h
+                            start_x = (w - h) // 2
+                            cropped = gray_img[0:h, start_x:start_x + crop_size]
+                        
+                        return cv2.resize(cropped, (target_size, target_size))
+                        
+                except Exception as e:
+                    # Fallback: direct resize
+                    print(f"⚠️ Face detection failed, using direct resize: {e}")
+                    return cv2.resize(gray_img, (target_size, target_size))
+            
+            # Apply smart face cropping
             height, width = 224, 224  # Standard face recognition size
-            gray1_resized = cv2.resize(gray1, (width, height))
-            gray2_resized = cv2.resize(gray2, (width, height))
+            gray1_resized = smart_face_crop(gray1, width)
+            gray2_resized = smart_face_crop(gray2, width)
             
             # Calculate SSIM
             ssim_score = ssim(gray1_resized, gray2_resized)
