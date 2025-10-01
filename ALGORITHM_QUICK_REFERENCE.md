@@ -138,7 +138,7 @@ Final Score = (
 
 ### Basic Evaluation
 ```python
-from compatible_evaluation_system import CompatibleEvaluationSystem
+from evaluator import CompatibleEvaluationSystem
 
 evaluator = CompatibleEvaluationSystem()
 results = evaluator.evaluate_character_consistency(img1, img2)

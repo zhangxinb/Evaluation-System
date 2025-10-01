@@ -82,18 +82,18 @@ This professional-grade evaluation system is specifically designed for analyzing
 
 ```
 Evaluation System/
-├── 📄 launch_simple_amd.py              # Main application launcher (469 lines)
+├── 📄 app.py                          # Main application launcher (469 lines)
 │   ├── 🎯 format_advanced_results()     # Professional 6-section English reporting
 │   ├── 🔄 format_fallback_results()     # Fallback mode formatting
 │   └── 🚀 create_gradio_interface()     # Web UI initialization
 │
-├── 📄 compatible_evaluation_system.py   # Core evaluation engine (536 lines)
+├── 📄 evaluator.py                    # Core evaluation engine (536 lines)
 │   ├── 🧠 _safe_clip_analysis()         # CLIP with timeout protection
 │   ├── 👁️ _safe_lpips_analysis()        # LPIPS with error handling
 │   ├── 🎯 evaluate_character_consistency() # Main evaluation orchestrator
 │   └── 📊 _calculate_traditional_metrics() # Classical CV metrics
 │
-├── 📄 professional_identity_evaluator.py # Face recognition system (386 lines)
+├── 📄 face_recognition.py             # Face recognition system (386 lines)
 │   ├── 👤 calculate_identity_similarity() # Multi-model face analysis
 │   ├── 🔄 _fallback_evaluation()        # Traditional CV fallback methods
 │   └── 📈 _enhanced_fallback_analysis() # 4-method ensemble approach
@@ -134,7 +134,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # 5. Launch the application
-python launch_simple_amd.py
+python app.py
 ```
 
 ### Manual Installation Steps
@@ -177,7 +177,7 @@ Expected output should show: `['professional', 'clip', 'lpips']`
 
 ```bash
 # Standard launch (recommended)
-python launch_simple_amd.py
+python app.py
 
 # The application will start on: http://127.0.0.1:7862
 ```
@@ -200,7 +200,7 @@ python launch_simple_amd.py
 ### API Usage Example
 
 ```python
-from compatible_evaluation_system import CompatibleEvaluationSystem
+from evaluator import CompatibleEvaluationSystem
 import cv2
 
 # Initialize the system

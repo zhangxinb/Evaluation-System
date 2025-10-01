@@ -298,7 +298,7 @@ def main():
         
         # Check if advanced evaluation system is available
         try:
-            from compatible_evaluation_system import CompatibleEvaluationSystem
+            from evaluator import CompatibleEvaluationSystem
             evaluator = CompatibleEvaluationSystem()
             use_advanced_algorithms = True
             print("✅ Advanced algorithms loaded successfully")

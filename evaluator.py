@@ -38,7 +38,7 @@ class CompatibleEvaluationSystem:
     def _initialize_professional_evaluator(self):
         """Initialize professional evaluator with compatibility checks"""
         try:
-            from professional_identity_evaluator import ProfessionalIdentityEvaluator
+            from face_recognition import ProfessionalIdentityEvaluator
             self.professional_evaluator = ProfessionalIdentityEvaluator()
             self.available_methods['professional'] = True
             print("✅ Professional evaluator loaded")
