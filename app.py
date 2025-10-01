@@ -360,19 +360,58 @@ def main():
                 
                 print(f"📊 Processing images: {img1_np.shape} vs {img2_np.shape}")
                 
-                # Resize images to manageable size for CPU processing
-                max_size = 512
-                if max(img1_np.shape[:2]) > max_size:
-                    scale = max_size / max(img1_np.shape[:2])
-                    new_height = int(img1_np.shape[0] * scale)
-                    new_width = int(img1_np.shape[1] * scale)
-                    img1_np = cv2.resize(img1_np, (new_width, new_height))
+                # Smart preprocessing: preserve face details
+                def smart_preprocess(img, max_size=512):
+                    """
+                    Intelligent preprocessing that preserves important regions
+                    1. If image is small enough, keep original
+                    2. If face detected, crop and resize to preserve face
+                    3. Otherwise, proportional resize
+                    """
+                    if max(img.shape[:2]) <= max_size:
+                        return img
+                    
+                    try:
+                        # Try to detect face
+                        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) if len(img.shape) == 3 else img
+                        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+                        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+                        
+                        if len(faces) > 0:
+                            # Face detected, crop with context
+                            (x, y, w, h) = max(faces, key=lambda f: f[2] * f[3])
+                            
+                            # Add generous padding (50% of face size)
+                            padding = int(max(w, h) * 0.5)
+                            x1 = max(0, x - padding)
+                            y1 = max(0, y - padding)
+                            x2 = min(img.shape[1], x + w + padding)
+                            y2 = min(img.shape[0], y + h + padding)
+                            
+                            # Crop face region
+                            face_region = img[y1:y2, x1:x2]
+                            
+                            # Resize while preserving aspect ratio
+                            h_crop, w_crop = face_region.shape[:2]
+                            if max(h_crop, w_crop) > max_size:
+                                scale = max_size / max(h_crop, w_crop)
+                                new_w = int(w_crop * scale)
+                                new_h = int(h_crop * scale)
+                                return cv2.resize(face_region, (new_w, new_h))
+                            return face_region
+                    except:
+                        pass
+                    
+                    # No face or error, do proportional resize
+                    scale = max_size / max(img.shape[:2])
+                    new_height = int(img.shape[0] * scale)
+                    new_width = int(img.shape[1] * scale)
+                    return cv2.resize(img, (new_width, new_height))
                 
-                if max(img2_np.shape[:2]) > max_size:
-                    scale = max_size / max(img2_np.shape[:2])
-                    new_height = int(img2_np.shape[0] * scale)
-                    new_width = int(img2_np.shape[1] * scale)
-                    img2_np = cv2.resize(img2_np, (new_width, new_height))
+                # Apply smart preprocessing
+                img1_np = smart_preprocess(img1_np)
+                img2_np = smart_preprocess(img2_np)
+                print(f"📊 After preprocessing: {img1_np.shape} vs {img2_np.shape}")
                 
                 # Run evaluation
                 print("🔬 Running character consistency analysis...")

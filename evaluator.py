@@ -299,13 +299,35 @@ class CompatibleEvaluationSystem:
             from skimage.metrics import structural_similarity as ssim
             from skimage.metrics import peak_signal_noise_ratio as psnr
             
-            # Resize to same dimensions
+            # Smart alignment to same dimensions
             h1, w1 = image1.shape[:2]
             h2, w2 = image2.shape[:2]
-            target_size = (min(h1, h2), min(w1, w2))
             
-            img1_resized = cv2.resize(image1, (target_size[1], target_size[0]))
-            img2_resized = cv2.resize(image2, (target_size[1], target_size[0]))
+            # Use center crop to preserve content quality
+            target_h = min(h1, h2)
+            target_w = min(w1, w2)
+            
+            def center_crop_and_resize(img, target_h, target_w):
+                h, w = img.shape[:2]
+                
+                # Center crop if needed
+                if h > target_h or w > target_w:
+                    # Calculate crop coordinates
+                    start_y = (h - target_h) // 2 if h > target_h else 0
+                    start_x = (w - target_w) // 2 if w > target_w else 0
+                    end_y = start_y + target_h if h > target_h else h
+                    end_x = start_x + target_w if w > target_w else w
+                    
+                    img = img[start_y:end_y, start_x:end_x]
+                
+                # Resize if dimensions don't match exactly
+                if img.shape[0] != target_h or img.shape[1] != target_w:
+                    img = cv2.resize(img, (target_w, target_h), interpolation=cv2.INTER_AREA)
+                
+                return img
+            
+            img1_resized = center_crop_and_resize(image1, target_h, target_w)
+            img2_resized = center_crop_and_resize(image2, target_h, target_w)
             
             # Convert to grayscale for some metrics
             if len(img1_resized.shape) == 3:
