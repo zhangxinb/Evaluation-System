@@ -346,7 +346,7 @@ def main():
             """Main evaluation function with enhanced formatting"""
             try:
                 if image1 is None or image2 is None:
-                    return "❌ 请上传两张图片进行比较 | Please upload both images for comparison"
+                    return "Error: Please upload both images for comparison"
                 
                 # Convert PIL images to numpy arrays
                 img1_np = np.array(image1)
@@ -394,51 +394,41 @@ def main():
                 return result_text
                 
             except Exception as e:
-                return f"❌ Error during evaluation: {str(e)}\n\nPlease check:\n- Both images are uploaded correctly\n- Images are in supported format (JPG, PNG)\n- System dependencies are installed\n\nFor troubleshooting, run: python test_evaluation.py"
+                return f"Error: {str(e)}\n\nPlease check:\n- Both images are uploaded correctly\n- Images are in supported format (JPG, PNG)\n- System dependencies are installed"
         
         # Create Gradio interface
-        with gr.Blocks(title="Professional Image Evaluator", theme=gr.themes.Soft()) as interface:
+        with gr.Blocks(title="Character Consistency Evaluation", theme=gr.themes.Soft()) as interface:
             
-            gr.Markdown("# 🎯 Professional Image Evaluation System")
-            gr.Markdown("Optimized for integrated graphics and CPU processing")
+            gr.Markdown("# Character Consistency Evaluation")
             
             with gr.Row():
                 with gr.Column():
-                    image1_input = gr.Image(type="pil", label="Original Image")
+                    image1_input = gr.Image(type="pil", label="Reference Image")
                     
                 with gr.Column():
-                    image2_input = gr.Image(type="pil", label="Generated/Comparison Image")
+                    image2_input = gr.Image(type="pil", label="Target Image")
             
-            evaluate_button = gr.Button("🔬 Analyze Character Consistency", variant="primary", size="lg")
+            evaluate_button = gr.Button("Analyze", variant="primary", size="lg")
             
             with gr.Row():
                 output_text = gr.Textbox(
-                    label="Analysis Results", 
+                    label="Results", 
                     lines=30,
                     max_lines=50,
                     show_copy_button=True
                 )
             
             gr.Markdown("""
-            ### 📖 Usage Instructions:
-            1. Upload the **original character image** on the left
-            2. Upload the **generated/comparison image** on the right  
-            3. Click **"Analyze Character Consistency"** to start evaluation
-            4. Review the detailed **segmented analysis report**
+            ### Usage:
+            1. Upload reference image (left)
+            2. Upload target image (right)
+            3. Click Analyze
             
-            ### 🔬 Analysis Features:
-            - **Multi-model face recognition consensus** (when available)
-            - **CLIP semantic similarity analysis** (Vision Transformer)
-            - **LPIPS perceptual similarity** (Human-like perception)
-            - **Enhanced traditional metrics** (SSIM, PSNR, MSE)
-            - **Professional recommendations** with confidence levels
-            - **Comprehensive technical information**
-            
-            ### ⚙️ System Optimization:
-            - CPU-optimized processing for integrated graphics
-            - Automatic fallback to compatible algorithms
-            - Memory-efficient image preprocessing
-            - Professional report formatting with clear segmentation
+            ### Analysis Methods:
+            - Multi-model face recognition
+            - CLIP semantic similarity
+            - LPIPS perceptual similarity
+            - Traditional metrics (SSIM, PSNR, MSE)
             """)
             
             evaluate_button.click(
