@@ -7,9 +7,13 @@ Optimized for integrated graphics and CPU processing
 import os
 import sys
 import warnings
+from data_logger import EvaluationDataLogger
 
 # Suppress warnings for cleaner output
 warnings.filterwarnings('ignore')
+
+# Initialize global data logger
+DATA_LOGGER = None
 
 def format_segmented_results(results, use_advanced_algorithms, img1_np, img2_np):
     """
@@ -43,15 +47,6 @@ def format_advanced_results(results, img1_np, img2_np):
     result_text += f"Interpretation: {interpretation}\n"
     result_text += f"Confidence:     {results.get('Overall_Confidence', 0.0):.3f}\n\n"
     
-    # Score Reference
-    result_text += "SCORE REFERENCE\n"
-    result_text += "-"*70 + "\n"
-    result_text += "0.80 - 1.00  Excellent consistency\n"
-    result_text += "0.60 - 0.80  Good consistency\n"
-    result_text += "0.40 - 0.60  Moderate consistency\n"
-    result_text += "0.20 - 0.40  Low consistency\n"
-    result_text += "0.00 - 0.20  Very low consistency\n\n"
-    
     # Algorithm Results
     result_text += "ALGORITHM RESULTS\n"
     result_text += "-"*70 + "\n"
@@ -75,10 +70,10 @@ def format_advanced_results(results, img1_np, img2_np):
         result_text += f"  Model:       Vision Transformer (ViT-B/32)\n\n"
     
     # LPIPS Analysis
-    if 'LPIPS_Similarity' in results:
-        lpips_score = results['LPIPS_Similarity']
+    if 'LPIPS_Distance' in results:
+        lpips_dist = results['LPIPS_Distance']
         result_text += f"LPIPS Perceptual Analysis:\n"
-        result_text += f"  Similarity:  {lpips_score:.4f}\n"
+        result_text += f"  Distance:    {lpips_dist:.4f} (lower is better)\n"
         result_text += f"  Network:     AlexNet Perceptual Model\n\n"
     
     # Traditional Metrics
@@ -112,7 +107,7 @@ def format_fallback_results(results, img1_np, img2_np):
     """Format results for fallback mode with clear segmentation - English version"""
     
     result_text = "\n" + "="*75 + "\n"
-    result_text += "📊 Professional Image Evaluation Results (Basic Compatibility Mode)\n"
+    result_text += "Evaluation Results (Basic Compatibility Mode)\n"
     result_text += "="*75 + "\n\n"
     
     # Quick Assessment
@@ -128,19 +123,19 @@ def format_fallback_results(results, img1_np, img2_np):
             assessment_color = "🔴"
             assessment_text = "Low Similarity"
             
-        result_text += f"📋 Quick Assessment\n"
+        result_text += f"Quick Assessment\n"
         result_text += f"{assessment_color} {assessment_text} (Score: {identity_score:.3f})\n\n"
     
     # Image Information
-    result_text += "📸 Image Information\n"
+    result_text += "Image Information\n"
     result_text += "─"*25 + "\n"
-    result_text += f"📏 Original Image Size: {img1_np.shape[1]} × {img1_np.shape[0]} pixels\n"
-    result_text += f"📏 Comparison Image Size: {img2_np.shape[1]} × {img2_np.shape[0]} pixels\n"
-    result_text += f"⚙️ Processing Mode: Basic Fallback\n"
-    result_text += f"💡 Tip: Install advanced algorithm packages for detailed analysis\n\n"
+    result_text += f"Original Image Size: {img1_np.shape[1]} × {img1_np.shape[0]} pixels\n"
+    result_text += f"Comparison Image Size: {img2_np.shape[1]} × {img2_np.shape[0]} pixels\n"
+    result_text += f"Processing Mode: Basic Fallback\n"
+    result_text += f"Tip: Install advanced algorithm packages for detailed analysis\n\n"
     
     # Traditional Image Quality Metrics
-    result_text += "🔍 Traditional Image Quality Metrics\n"
+    result_text += "Traditional Image Quality Metrics\n"
     result_text += "─"*40 + "\n"
     
     if 'SSIM' in results:
@@ -158,7 +153,7 @@ def format_fallback_results(results, img1_np, img2_np):
     # Professional Identity Analysis (fallback mode)
     identity_metrics = ['Identity_Similarity', 'Identity_Confidence', 'Identity_Decision', 
                       'Detection_Method']
-    result_text += "🎯 Professional Identity Analysis\n"
+    result_text += "Professional Identity Analysis\n"
     result_text += "─"*40 + "\n"
     
     for key in identity_metrics:
@@ -176,29 +171,29 @@ def format_fallback_results(results, img1_np, img2_np):
                 result_text += f"└─ Analysis Method: {results[key]}\n\n"
     
     # Basic Recommendations
-    result_text += "💡 Basic Recommendations\n"
+    result_text += "Basic Recommendations\n"
     result_text += "─"*30 + "\n"
     
     if 'Identity_Similarity' in results:
         score = results['Identity_Similarity']
         if score >= 0.6:
-            result_text += "✅ High similarity - can consider using\n"
+            result_text += "High similarity - can consider using\n"
         elif score >= 0.4:
-            result_text += "🟡 Moderate similarity - manual review recommended\n"
+            result_text += "Moderate similarity - manual review recommended\n"
         else:
-            result_text += "🔴 Low similarity - use with caution\n"
+            result_text += "Low similarity - use with caution\n"
     
-    result_text += "📈 Recommend upgrading to advanced algorithm mode for more accurate results\n\n"
+    result_text += "Recommend upgrading to advanced algorithm mode for more accurate results\n\n"
     
     # Technical Info
-    result_text += "⚙️ Technical Information\n"
+    result_text += "Technical Information\n"
     result_text += "─"*30 + "\n"
-    result_text += f"🔧 System Version: Basic Evaluation System v1.0\n"
-    result_text += f"💻 Compatibility Mode: CPU-optimized processing\n"
-    result_text += f"📊 Processing Time: {img1_np.shape[0] * img1_np.shape[1] / 200000:.1f}s (estimated)\n\n"
+    result_text += f"System Version: Basic Evaluation System v1.0\n"
+    result_text += f"Compatibility Mode: CPU-optimized processing\n"
+    result_text += f"Processing Time: {img1_np.shape[0] * img1_np.shape[1] / 200000:.1f}s (estimated)\n\n"
     
     result_text += "="*75 + "\n"
-    result_text += "📄 Basic Assessment Complete\n"
+    result_text += "Basic Assessment Complete\n"
     result_text += "="*75 + "\n"
     
     return result_text
@@ -210,18 +205,18 @@ def main():
         from PIL import Image
         import cv2
         
-        print("🔧 Initializing Professional Image Evaluation System...")
-        print("⚙️ CPU and Integrated Graphics Optimization Mode")
+        print("Initializing Professional Image Evaluation System...")
+        print("CPU and Integrated Graphics Optimization Mode")
         
         # Check if advanced evaluation system is available
         try:
             from evaluator import CompatibleEvaluationSystem
             evaluator = CompatibleEvaluationSystem()
             use_advanced_algorithms = True
-            print("✅ Advanced algorithms loaded successfully")
-            print("🚀 Multi-model consensus analysis enabled")
+            print("Advanced algorithms loaded successfully")
+            print("Multi-model consensus analysis enabled")
         except ImportError as e:
-            print(f"⚠️ Advanced algorithms not available: {e}")
+            print(f"Advanced algorithms not available: {e}")
             print("📱 Falling back to basic evaluation system...")
             use_advanced_algorithms = False
             
@@ -259,8 +254,8 @@ def main():
             
             evaluator = BasicEvaluator()
         
-        def evaluate_images(image1, image2):
-            """Main evaluation function with enhanced formatting"""
+        def evaluate_images(image1, image2, sample_category="Unknown", sample_id=None, notes=""):
+            """Main evaluation function with enhanced formatting and data logging"""
             try:
                 if image1 is None or image2 is None:
                     return "Error: Please upload both images for comparison"
@@ -275,7 +270,7 @@ def main():
                 if len(img2_np.shape) == 3 and img2_np.shape[2] == 4:  # RGBA to RGB
                     img2_np = img2_np[:, :, :3]
                 
-                print(f"📊 Processing images: {img1_np.shape} vs {img2_np.shape}")
+                print(f"Processing images: {img1_np.shape} vs {img2_np.shape}")
                 
                 # Simplified preprocessing: just resize if too large
                 # Let face_recognition.py handle all face detection
@@ -285,7 +280,7 @@ def main():
                     Face detection will be handled by the professional face_recognition module
                     """
                     if max(img.shape[:2]) <= max_size:
-                        print(f"   ℹ️ Image size OK, no resize needed")
+                        print(f" Image size OK, no resize needed")
                         return img
                     
                     # Proportional resize only
@@ -293,18 +288,18 @@ def main():
                     new_height = int(img.shape[0] * scale)
                     new_width = int(img.shape[1] * scale)
                     resized = cv2.resize(img, (new_width, new_height))
-                    print(f"   📐 Resized from {img.shape[:2]} to {resized.shape[:2]}")
+                    print(f"  Resized from {img.shape[:2]} to {resized.shape[:2]}")
                     return resized
                 
                 # Apply simple preprocessing (no face detection here)
-                print("🔧 Preprocessing images...")
+                print("Preprocessing images...")
                 img1_np = simple_resize(img1_np)
                 img2_np = simple_resize(img2_np)
-                print(f"📊 After preprocessing: {img1_np.shape} vs {img2_np.shape}")
-                print("   ➡️ Face detection will be handled by professional module")
+                print(f"After preprocessing: {img1_np.shape} vs {img2_np.shape}")
+                print("   Face detection will be handled by professional module")
                 
                 # Run evaluation
-                print("🔬 Running character consistency analysis...")
+                print("Running character consistency analysis...")
                 results = evaluator.evaluate_character_consistency(img1_np, img2_np)
                 
                 # Add basic histogram analysis if not present
@@ -320,15 +315,45 @@ def main():
                 # Format results with clear segmented display
                 result_text = format_segmented_results(results, use_advanced_algorithms, img1_np, img2_np)
                 
+                # Log results to database if logger available and category is specified
+                if DATA_LOGGER and sample_category != "Unknown":
+                    try:
+                        # Get image names from file objects if available
+                        img1_name = getattr(image1, 'filename', 'image1.jpg')
+                        img2_name = getattr(image2, 'filename', 'image2.jpg')
+                        
+                        logged_id = DATA_LOGGER.log_evaluation(
+                            results=results,
+                            sample_category=sample_category,
+                            sample_id=sample_id,
+                            image1_name=img1_name,
+                            image2_name=img2_name,
+                            notes=notes
+                        )
+                        result_text += f"\n\nData logged: {logged_id}"
+                    except Exception as e:
+                        print(f"Failed to log data: {e}")
+                
                 return result_text
                 
             except Exception as e:
                 return f"Error: {str(e)}\n\nPlease check:\n- Both images are uploaded correctly\n- Images are in supported format (JPG, PNG)\n- System dependencies are installed"
         
+        # Initialize data logger
+        global DATA_LOGGER
+        try:
+            DATA_LOGGER = EvaluationDataLogger(data_dir="evaluation_data")
+            print("Data logger initialized - results will be saved automatically")
+        except Exception as e:
+            print(f"Data logger initialization failed: {e}")
+            print("   Continuing without data logging...")
+            DATA_LOGGER = None
+        
         # Create Gradio interface
         with gr.Blocks(title="Character Consistency Evaluation", theme=gr.themes.Soft()) as interface:
             
             gr.Markdown("# Character Consistency Evaluation")
+            gr.Markdown("*Research Data Collection: Results are automatically logged for hypothesis validation*")
             
             with gr.Row():
                 with gr.Column():
@@ -336,6 +361,26 @@ def main():
                     
                 with gr.Column():
                     image2_input = gr.Image(type="pil", label="Target Image")
+            
+            with gr.Row():
+                category_input = gr.Dropdown(
+                    choices=["Unknown", "Basic", "Attribute", "Boundary"],
+                    value="Unknown",
+                    label="Sample Category",
+                    info="Select category for hypothesis validation"
+                )
+                
+                sample_id_input = gr.Textbox(
+                    label="Sample ID (Optional)",
+                    placeholder="e.g., test_001",
+                    info="Leave empty for auto-generated ID"
+                )
+                
+                notes_input = gr.Textbox(
+                    label="Notes (Optional)",
+                    placeholder="e.g., Same person, different lighting",
+                    info="Additional notes for this evaluation"
+                )
             
             evaluate_button = gr.Button("Analyze", variant="primary", size="lg")
             
@@ -351,23 +396,35 @@ def main():
             ### Usage:
             1. Upload reference image (left)
             2. Upload target image (right)
-            3. Click Analyze
+            3. Select sample category for research data collection
+            4. Click Analyze
+            
+            ### Sample Categories:
+            - **Basic**: High consistency expected (all metrics should be high)
+            - **Attribute**: Identity same, attributes different (face metrics high, SSIM low)
+            - **Boundary**: Critical failures (all metrics should be low)
+            - **Unknown**: For exploratory analysis (not used in hypothesis validation)
             
             ### Analysis Methods:
-            - Multi-model face recognition
-            - CLIP semantic similarity
+            - DeepFace multi-model identity recognition
+            - CLIP semantic similarity (image-level)
             - LPIPS perceptual similarity
-            - Traditional metrics (SSIM, PSNR, MSE)
+            - Traditional metrics (SSIM, PSNR, MSE, Histogram)
+            
+            ### Data Collection:
+            - All evaluations are automatically saved to CSV/JSON
+            - Data can be used for visualization and statistical analysis
+            - Run `python visualizer.py` to generate plots
             """)
             
             evaluate_button.click(
                 evaluate_images,
-                inputs=[image1_input, image2_input],
+                inputs=[image1_input, image2_input, category_input, sample_id_input, notes_input],
                 outputs=output_text
             )
         
-        print("🚀 Starting web interface on http://127.0.0.1:7862")
-        print("📊 Ready for professional image evaluation!")
+        print("Starting web interface on http://127.0.0.1:7862")
+        print("Ready for professional image evaluation!")
         interface.launch(
             server_name="127.0.0.1",
             server_port=7862,
@@ -376,8 +433,8 @@ def main():
         )
         
     except Exception as e:
-        print(f"❌ Failed to start system: {e}")
-        print("\n🔧 Troubleshooting steps:")
+        print(f"Failed to start system: {e}")
+        print("\nTroubleshooting steps:")
         print("1. Check if all required packages are installed")
         print("2. Run: pip install gradio pillow opencv-python scikit-image numpy")
         print("3. Ensure compatible_evaluation_system.py is available")

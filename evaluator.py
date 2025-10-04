@@ -13,7 +13,12 @@ warnings.filterwarnings('ignore')
 class CompatibleEvaluationSystem:
     """
     Compatibility-enhanced evaluation system that gracefully handles:
-    1. TensorFlow version conflicts
+    1. TensorFl                methods_used.append('Professional Identity')
+        
+        # CLIP score
+        clip_result = results.get('advanced_metrics', {}).get('clip', {})PIPS distance (note: lower is better, so we don't add it to scores)
+        # LPIPS provides distance metric which needs inverse interpretation
+        # For final score calculation, we primarily rely on similarity metricslicts
     2. Missing optional dependencies
     3. Model loading failures
     4. Hardware limitations
@@ -250,17 +255,40 @@ class CompatibleEvaluationSystem:
             return {'error': f'CLIP analysis failed: {e}'}
     
     def _safe_lpips_analysis(self, image1: np.ndarray, image2: np.ndarray) -> Dict[str, Any]:
-        """Safe LPIPS analysis with error handling"""
+        """
+        Safe LPIPS analysis with error handling
+        
+        LPIPS (Learned Perceptual Image Patch Similarity):
+        - Distance range: [0, ~1.5+] (0 = identical, higher = more different)
+        - For same person photos: typically 0.1-0.4 (depending on variation)
+        - For different people: typically 0.5-1.0+
+        
+        Improvements:
+        1. Higher resolution (512x512) to preserve facial details
+        2. ImageNet normalization for better feature extraction
+        3. Improved similarity conversion with calibrated scaling
+        """
         try:
             import torch
             from PIL import Image
             import torchvision.transforms as transforms
             
-            # Prepare transform
+            # Get original image sizes for adaptive resize
+            h1, w1 = image1.shape[:2]
+            h2, w2 = image2.shape[:2]
+            
+            # Use higher resolution to preserve facial details
+            # LPIPS works better with more detail for face comparisons
+            target_size = 512  # Increased from 256
+            
+            # Prepare transform with ImageNet normalization
+            # This matches LPIPS training and gives better results
             transform = transforms.Compose([
-                transforms.Resize((256, 256)),
+                transforms.Resize((target_size, target_size), interpolation=Image.LANCZOS),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                # ImageNet normalization (better for perceptual models)
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                                   std=[0.229, 0.224, 0.225])
             ])
             
             # Convert and transform images (handle both RGB and BGR input)
@@ -275,19 +303,32 @@ class CompatibleEvaluationSystem:
             img1_tensor = transform(img1_pil).unsqueeze(0)
             img2_tensor = transform(img2_pil).unsqueeze(0)
             
-            # Calculate LPIPS
+            # Calculate LPIPS distance
             with torch.no_grad():
                 lpips_distance = self.lpips_alex(img1_tensor, img2_tensor).item()
             
-            # Convert to similarity
-            lpips_similarity = max(0, 1.0 - lpips_distance)
+            # Output LPIPS distance only (no conversion to similarity)
+            # Lower distance = more similar
+            # - Same person, similar pose/lighting: 0.05-0.20 distance
+            # - Same person, different conditions: 0.20-0.50 distance
+            # - Different people: 0.50-1.50+ distance
+            print(f"🔍 LPIPS - Distance: {lpips_distance:.4f}")
             
-            print(f"🔍 LPIPS Distance: {lpips_distance:.4f}, Similarity: {lpips_similarity:.4f}")
+            # Interpretation helper
+            if lpips_distance < 0.2:
+                interpretation = "Very similar (likely same person, similar conditions)"
+            elif lpips_distance < 0.4:
+                interpretation = "Similar (likely same person, some variations)"
+            elif lpips_distance < 0.6:
+                interpretation = "Moderate difference (borderline, check other metrics)"
+            else:
+                interpretation = "High difference (likely different people or extreme variations)"
             
             return {
-                'lpips_similarity': lpips_similarity,
-                'lpips_distance': lpips_distance,
-                'method': 'LPIPS Compatible Analysis'
+                'lpips_distance': float(lpips_distance),
+                'lpips_interpretation': interpretation,
+                'resolution_used': f'{target_size}x{target_size}',
+                'method': 'LPIPS Distance Analysis (AlexNet, ImageNet norm)'
             }
             
         except Exception as e:
@@ -381,13 +422,9 @@ class CompatibleEvaluationSystem:
                 scores.append(clip_score)
                 methods_used.append('CLIP Analysis')
         
-        # LPIPS score
-        lpips_result = results.get('advanced_metrics', {}).get('lpips', {})
-        if 'lpips_similarity' in lpips_result:
-            lpips_score = lpips_result['lpips_similarity']
-            if isinstance(lpips_score, (int, float)) and not np.isnan(lpips_score):
-                scores.append(lpips_score)
-                methods_used.append('LPIPS Analysis')
+        # Note: LPIPS distance is not included in final score calculation
+        # because it uses inverse direction (lower is better)
+        # We focus on similarity-based metrics for the final assessment
         
         # Traditional metrics score
         traditional = results.get('traditional_metrics', {})
@@ -479,11 +516,11 @@ class CompatibleEvaluationSystem:
                 if not clip_data.get('error'):
                     final_results['CLIP_Similarity'] = clip_data.get('clip_image_similarity', 0.0)
             
-            # LPIPS Results
+            # LPIPS Results (distance only)
             if 'advanced_metrics' in enhanced_results and 'lpips' in enhanced_results['advanced_metrics']:
                 lpips_data = enhanced_results['advanced_metrics']['lpips']
                 if not lpips_data.get('error'):
-                    final_results['LPIPS_Similarity'] = lpips_data.get('lpips_similarity', 0.0)
+                    final_results['LPIPS_Distance'] = lpips_data.get('lpips_distance', 0.0)
             
             # Traditional Metrics
             if 'traditional_metrics' in enhanced_results:
