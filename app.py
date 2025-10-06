@@ -204,10 +204,11 @@ def main():
         import numpy as np
         from PIL import Image
         import cv2
-        
+        import pandas as pd
+
         print("Initializing Professional Image Evaluation System...")
         print("CPU and Integrated Graphics Optimization Mode")
-        
+
         # Check if advanced evaluation system is available
         try:
             from evaluator import CompatibleEvaluationSystem
@@ -222,7 +223,7 @@ def main():
             
             # Basic fallback evaluator
             class BasicEvaluator:
-                def evaluate_character_consistency(self, img1, img2):
+                def evaluate_character_consistency(self, img1, img2, prompt=None):
                     try:
                         # Convert images to grayscale for basic analysis
                         gray1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
@@ -230,10 +231,10 @@ def main():
                         
                         # Basic SSIM calculation
                         from skimage.metrics import structural_similarity
-                        ssim_score = structural_similarity(gray1, gray2)
+                        ssim_score, _ = structural_similarity(gray1, gray2, full=True)
                         
                         # Basic MSE calculation
-                        mse = np.mean((gray1 - gray2) ** 2)
+                        mse = np.mean((gray1.astype(float) - gray2.astype(float)) ** 2)
                         
                         # Basic PSNR calculation
                         if mse > 0:
@@ -245,7 +246,7 @@ def main():
                             'SSIM': ssim_score,
                             'MSE': mse,
                             'PSNR': psnr,
-                            'Identity_Similarity': ssim_score,  # Use SSIM as basic similarity
+                            'Final_Score': ssim_score, # Use SSIM as basic similarity
                             'Identity_Decision': 'Same Person' if ssim_score > 0.5 else 'Different Person',
                             'Detection_Method': 'Basic SSIM Analysis'
                         }
@@ -253,7 +254,88 @@ def main():
                         return {'Error': str(e)}
             
             evaluator = BasicEvaluator()
-        
+
+        def evaluate_multiple_images(reference_image, target_images, sample_category="Unknown", notes=""):
+            """Main evaluation function for multiple target images."""
+            if reference_image is None:
+                return "Error: Please upload a reference image.", None
+            if not target_images:
+                return "Error: Please upload at least one target image.", None
+
+            ref_img_np = np.array(reference_image)
+            if len(ref_img_np.shape) == 3 and ref_img_np.shape[2] == 4:
+                ref_img_np = ref_img_np[:, :, :3]
+
+            all_results = []
+
+            for target_image_file in target_images:
+                try:
+                    # For Gradio File component, target_image_file is a tempfile object
+                    target_image = Image.open(target_image_file.name)
+                    target_img_np = np.array(target_image)
+                    if len(target_img_np.shape) == 3 and target_img_np.shape[2] == 4:
+                        target_img_np = target_img_np[:, :, :3]
+
+                    # Run evaluation
+                    results = evaluator.evaluate_character_consistency(ref_img_np, target_img_np)
+                    
+                    # Log data
+                    if DATA_LOGGER and sample_category != "Unknown":
+                        try:
+                            ref_name = getattr(reference_image, 'name', 'reference.jpg')
+                            target_name = os.path.basename(target_image_file.name)
+                            DATA_LOGGER.log_evaluation(
+                                results=results,
+                                sample_category=sample_category,
+                                image1_name=ref_name,
+                                image2_name=target_name,
+                                notes=notes
+                            )
+                        except Exception as e:
+                            print(f"Failed to log data for {target_name}: {e}")
+
+                    all_results.append({
+                        "image_name": os.path.basename(target_image_file.name),
+                        "final_score": results.get('Final_Score', 0.0),
+                        "identity_similarity": results.get('Identity_Similarity', 0.0),
+                        "clip_similarity": results.get('CLIP_Similarity', 0.0),
+                        "lpips_distance": results.get('LPIPS_Distance', 1.0),
+                    })
+                except Exception as e:
+                    all_results.append({
+                        "image_name": os.path.basename(target_image_file.name),
+                        "final_score": 0.0,
+                        "error": str(e)
+                    })
+
+            # Sort results by final_score descending
+            sorted_results = sorted(all_results, key=lambda x: x.get('final_score', 0.0), reverse=True)
+
+            # Format output
+            output_text = "## Batch Evaluation Results\n\n"
+            output_text += f"**Reference Image:** `{getattr(reference_image, 'name', 'reference.jpg')}`\n"
+            output_text += f"**Total Target Images:** `{len(target_images)}`\n\n"
+            output_text += "| Rank | Target Image | Final Score | Identity Sim. | CLIP Sim. | LPIPS Dist. |\n"
+            output_text += "|:----:|:-------------|:-----------:|:-------------:|:---------:|:-----------:|\n"
+
+            for i, res in enumerate(sorted_results):
+                if "error" in res:
+                    output_text += f"| {i+1} | {res['image_name']} | **ERROR** | - | - | - |\n"
+                else:
+                    output_text += (
+                        f"| {i+1} "
+                        f"| `{res['image_name']}` "
+                        f"| **{res.get('final_score', 0.0):.4f}** "
+                        f"| {res.get('identity_similarity', 0.0):.4f} "
+                        f"| {res.get('clip_similarity', 0.0):.4f} "
+                        f"| {res.get('lpips_distance', 1.0):.4f} |\n"
+                    )
+            
+            # Create a DataFrame for the plot
+            df = pd.DataFrame(sorted_results)
+            
+            return output_text, df
+
         def evaluate_images(image1, image2, sample_category="Unknown", sample_id=None, notes=""):
             """Main evaluation function with enhanced formatting and data logging"""
             try:
@@ -273,55 +355,28 @@ def main():
                 print(f"Processing images: {img1_np.shape} vs {img2_np.shape}")
                 
                 # Simplified preprocessing: just resize if too large
-                # Let face_recognition.py handle all face detection
                 def simple_resize(img, max_size=1024):
-                    """
-                    Simple proportional resize without face detection
-                    Face detection will be handled by the professional face_recognition module
-                    """
                     if max(img.shape[:2]) <= max_size:
-                        print(f" Image size OK, no resize needed")
                         return img
-                    
-                    # Proportional resize only
                     scale = max_size / max(img.shape[:2])
                     new_height = int(img.shape[0] * scale)
                     new_width = int(img.shape[1] * scale)
-                    resized = cv2.resize(img, (new_width, new_height))
-                    print(f"  Resized from {img.shape[:2]} to {resized.shape[:2]}")
-                    return resized
+                    return cv2.resize(img, (new_width, new_height))
                 
-                # Apply simple preprocessing (no face detection here)
-                print("Preprocessing images...")
                 img1_np = simple_resize(img1_np)
                 img2_np = simple_resize(img2_np)
-                print(f"After preprocessing: {img1_np.shape} vs {img2_np.shape}")
-                print("   Face detection will be handled by professional module")
                 
                 # Run evaluation
-                print("Running character consistency analysis...")
                 results = evaluator.evaluate_character_consistency(img1_np, img2_np)
                 
-                # Add basic histogram analysis if not present
-                if 'Histogram_Similarity' not in results:
-                    try:
-                        hist1 = cv2.calcHist([img1_np], [0, 1, 2], None, [50, 50, 50], [0, 256, 0, 256, 0, 256])
-                        hist2 = cv2.calcHist([img2_np], [0, 1, 2], None, [50, 50, 50], [0, 256, 0, 256, 0, 256])
-                        hist_similarity = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
-                        results['Histogram_Similarity'] = hist_similarity
-                    except Exception as e:
-                        results['Histogram_Error'] = str(e)
-                
-                # Format results with clear segmented display
+                # Format results
                 result_text = format_segmented_results(results, use_advanced_algorithms, img1_np, img2_np)
                 
-                # Log results to database if logger available and category is specified
+                # Log results
                 if DATA_LOGGER and sample_category != "Unknown":
                     try:
-                        # Get image names from file objects if available
-                        img1_name = getattr(image1, 'filename', 'image1.jpg')
-                        img2_name = getattr(image2, 'filename', 'image2.jpg')
-                        
+                        img1_name = getattr(image1, 'name', 'image1.jpg')
+                        img2_name = getattr(image2, 'name', 'image2.jpg')
                         logged_id = DATA_LOGGER.log_evaluation(
                             results=results,
                             sample_category=sample_category,
@@ -337,8 +392,8 @@ def main():
                 return result_text
                 
             except Exception as e:
-                return f"Error: {str(e)}\n\nPlease check:\n- Both images are uploaded correctly\n- Images are in supported format (JPG, PNG)\n- System dependencies are installed"
-        
+                return f"Error: {str(e)}\n\nPlease check system dependencies."
+
         # Initialize data logger
         global DATA_LOGGER
         try:
@@ -346,99 +401,59 @@ def main():
             print("Data logger initialized - results will be saved automatically")
         except Exception as e:
             print(f"Data logger initialization failed: {e}")
-            print("   Continuing without data logging...")
             DATA_LOGGER = None
-        
+
         # Create Gradio interface
         with gr.Blocks(title="Character Consistency Evaluation", theme=gr.themes.Soft()) as interface:
-            
             gr.Markdown("# Character Consistency Evaluation")
             gr.Markdown("*Research Data Collection: Results are automatically logged for hypothesis validation*")
-            
-            with gr.Row():
-                with gr.Column():
-                    image1_input = gr.Image(type="pil", label="Reference Image")
-                    
-                with gr.Column():
-                    image2_input = gr.Image(type="pil", label="Target Image")
-            
-            with gr.Row():
-                category_input = gr.Dropdown(
-                    choices=["Unknown", "Basic", "Attribute", "Boundary"],
-                    value="Unknown",
-                    label="Sample Category",
-                    info="Select category for hypothesis validation"
-                )
-                
-                sample_id_input = gr.Textbox(
-                    label="Sample ID (Optional)",
-                    placeholder="e.g., test_001",
-                    info="Leave empty for auto-generated ID"
-                )
-                
-                notes_input = gr.Textbox(
-                    label="Notes (Optional)",
-                    placeholder="e.g., Same person, different lighting",
-                    info="Additional notes for this evaluation"
-                )
-            
-            evaluate_button = gr.Button("Analyze", variant="primary", size="lg")
-            
-            with gr.Row():
-                output_text = gr.Textbox(
-                    label="Results", 
-                    lines=30,
-                    max_lines=50,
-                    show_copy_button=True
-                )
-            
-            gr.Markdown("""
-            ### Usage:
-            1. Upload reference image (left)
-            2. Upload target image (right)
-            3. Select sample category for research data collection
-            4. Click Analyze
-            
-            ### Sample Categories:
-            - **Basic**: High consistency expected (all metrics should be high)
-            - **Attribute**: Identity same, attributes different (face metrics high, SSIM low)
-            - **Boundary**: Critical failures (all metrics should be low)
-            - **Unknown**: For exploratory analysis (not used in hypothesis validation)
-            
-            ### Analysis Methods:
-            - DeepFace multi-model identity recognition
-            - CLIP semantic similarity (image-level)
-            - LPIPS perceptual similarity
-            - Traditional metrics (SSIM, PSNR, MSE, Histogram)
-            
-            ### Data Collection:
-            - All evaluations are automatically saved to CSV/JSON
-            - Data can be used for visualization and statistical analysis
-            - Run `python visualizer.py` to generate plots
-            """)
-            
-            evaluate_button.click(
+
+            with gr.Tabs():
+                with gr.TabItem("Single Comparison"):
+                    with gr.Row():
+                        with gr.Column():
+                            image1_input = gr.Image(type="pil", label="Reference Image")
+                        with gr.Column():
+                            image2_input = gr.Image(type="pil", label="Target Image")
+                    with gr.Row():
+                        s_category_input = gr.Dropdown(["Unknown", "Basic", "Attribute", "Boundary"], value="Unknown", label="Sample Category")
+                        s_notes_input = gr.Textbox(label="Notes (Optional)")
+                    s_evaluate_button = gr.Button("Analyze Single", variant="primary")
+                    s_output_text = gr.Textbox(label="Results", lines=30, max_lines=50, show_copy_button=True)
+
+                with gr.TabItem("Batch Comparison"):
+                    with gr.Row():
+                        with gr.Column():
+                            b_image1_input = gr.Image(type="pil", label="Reference Image")
+                        with gr.Column():
+                            b_images2_input = gr.File(label="Target Images", file_count="multiple", file_types=["image"])
+                    with gr.Row():
+                        b_category_input = gr.Dropdown(["Unknown", "Basic", "Attribute", "Boundary"], value="Unknown", label="Sample Category")
+                        b_notes_input = gr.Textbox(label="Notes (Optional)")
+                    b_evaluate_button = gr.Button("Analyze Batch", variant="primary")
+                    b_output_text = gr.Markdown(label="Batch Results")
+                    b_plot_output = gr.BarPlot(x="image_name", y="final_score", title="Batch Results", y_lim=[0, 1])
+
+            s_evaluate_button.click(
                 evaluate_images,
-                inputs=[image1_input, image2_input, category_input, sample_id_input, notes_input],
-                outputs=output_text
+                inputs=[image1_input, image2_input, s_category_input, gr.Textbox(visible=False), s_notes_input],
+                outputs=s_output_text
+            )
+            
+            b_evaluate_button.click(
+                evaluate_multiple_images,
+                inputs=[b_image1_input, b_images2_input, b_category_input, b_notes_input],
+                outputs=[b_output_text, b_plot_output]
             )
         
         print("Starting web interface on http://127.0.0.1:7862")
-        print("Ready for professional image evaluation!")
-        interface.launch(
-            server_name="127.0.0.1",
-            server_port=7862,
-            share=False,
-            show_error=True
-        )
+        interface.launch(server_name="127.0.0.1", server_port=7862, show_error=True)
         
     except Exception as e:
         print(f"Failed to start system: {e}")
         print("\nTroubleshooting steps:")
-        print("1. Check if all required packages are installed")
-        print("2. Run: pip install gradio pillow opencv-python scikit-image numpy")
-        print("3. Ensure compatible_evaluation_system.py is available")
-        print("4. Try running: python test_evaluation.py")
+        print("1. Check if all required packages are installed: pip install -r requirements.txt")
+        print("2. Ensure you have a stable internet connection for model downloads.")
         sys.exit(1)
 
 if __name__ == "__main__":
