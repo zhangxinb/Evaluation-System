@@ -324,20 +324,22 @@ class ProfessionalIdentityEvaluator:
                 area_ratio = face_area / img_area
                 
                 # Reject if:
-                # 1. Too small (< 60x60 pixels OR < 3% of image) UNLESS it's from DeepFace and the only detection
+                # 1. Too small (< 60x60 pixels OR < 2% of image) UNLESS it's from DeepFace and the only detection
                 # 2. Extremely narrow aspect ratio (likely not a face)
                 aspect = h / w if w > 0 else 0
                 
                 reject = False
                 reason = ""
                 
-                if w < 60 or h < 60:
+                # More lenient size check for high-resolution images
+                if w < 50 or h < 50:  # Relaxed from 60 to 50
                     if not method.startswith('deepface_') or len(all_faces) > 1:
                         reject = True
                         reason = f"too small ({w}x{h})"
                 
-                if area_ratio < 0.03:  # Less than 3% of image
-                    if not (method.startswith('deepface_') and area_ratio > 0.01):
+                # Relaxed area threshold for high-resolution images
+                if area_ratio < 0.015:  # Relaxed from 2% to 1.5%
+                    if not (method.startswith('deepface_') and area_ratio > 0.003):  # Relaxed from 0.5% to 0.3%
                         reject = True
                         reason = f"tiny area ({area_ratio:.1%})"
                 
@@ -562,6 +564,19 @@ class ProfessionalIdentityEvaluator:
                     print("⚠️ Face detection failed in one or both images")
                     print(f"   Image 1: {'✅ Face detected' if face1_region is not None else '❌ No face'}")
                     print(f"   Image 2: {'✅ Face detected' if face2_region is not None else '❌ No face'}")
+                    
+                    # Save debug images showing detection failure (overwrite previous)
+                    try:
+                        # Save original images for inspection
+                        if face1_region is None:
+                            pil_img1.save('debug_FAILED_image1.jpg')
+                            print(f"   💾 Saved failed image: debug_FAILED_image1.jpg")
+                        if face2_region is None:
+                            pil_img2.save('debug_FAILED_image2.jpg')
+                            print(f"   💾 Saved failed image: debug_FAILED_image2.jpg")
+                    except Exception as e:
+                        print(f"   ⚠️ Failed to save debug images: {e}")
+                    
                     return {
                         'similarity': 0.0,
                         'confidence': 0.0,
@@ -600,11 +615,11 @@ class ProfessionalIdentityEvaluator:
                 face1_region.save(tmp1_path)
                 face2_region.save(tmp2_path)
                 
-                # DEBUG: Also save to visible location for inspection
+                # DEBUG: Save to visible location for inspection (only latest)
                 try:
                     from PIL import ImageDraw, ImageFont
                     
-                    # Save the cropped faces
+                    # Save the cropped faces (overwrite previous)
                     face1_region.save('debug_face1.jpg')
                     face2_region.save('debug_face2.jpg')
                     
@@ -642,10 +657,11 @@ class ProfessionalIdentityEvaluator:
                         draw2.rectangle([x1, y1, x2, y2], outline='green', width=2)
                         draw2.text((x1, y1-40), f"Crop: {x2-x1}x{y2-y1}", fill='green')
                     
+                    # Save original images with detection boxes (overwrite previous)
                     img1_with_box.save('debug_original1_with_box.jpg')
                     img2_with_box.save('debug_original2_with_box.jpg')
                     
-                    print(f"   🔍 Debug files saved:")
+                    print(f"   🔍 Debug files saved (latest evaluation):")
                     print(f"      - debug_face1.jpg (cropped face 1)")
                     print(f"      - debug_face2.jpg (cropped face 2)")
                     print(f"      - debug_original1_with_box.jpg (original 1 with boxes)")

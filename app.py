@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Professional Image Evaluation System Launcher
 Optimized for integrated graphics and CPU processing
@@ -8,6 +9,14 @@ import os
 import sys
 import warnings
 from data_logger import EvaluationDataLogger
+
+# Set UTF-8 encoding for Windows console
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except:
+        pass
 
 # Suppress warnings for cleaner output
 warnings.filterwarnings('ignore')
@@ -352,19 +361,27 @@ def main():
                 if len(img2_np.shape) == 3 and img2_np.shape[2] == 4:  # RGBA to RGB
                     img2_np = img2_np[:, :, :3]
                 
-                print(f"Processing images: {img1_np.shape} vs {img2_np.shape}")
-                
-                # Simplified preprocessing: just resize if too large
-                def simple_resize(img, max_size=1024):
-                    if max(img.shape[:2]) <= max_size:
+                # Simplified preprocessing: resize to reasonable size for face detection
+                def simple_resize(img, max_size=800):
+                    """
+                    Resize image to max_size while maintaining aspect ratio.
+                    Use smaller max_size (800) to ensure faces remain detectable after resize.
+                    """
+                    h, w = img.shape[:2]
+                    if max(h, w) <= max_size:
+                        print(f"   ✅ Image size OK ({w}x{h}), no resize needed")
                         return img
-                    scale = max_size / max(img.shape[:2])
-                    new_height = int(img.shape[0] * scale)
-                    new_width = int(img.shape[1] * scale)
-                    return cv2.resize(img, (new_width, new_height))
+                    scale = max_size / max(h, w)
+                    new_height = int(h * scale)
+                    new_width = int(w * scale)
+                    resized = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
+                    print(f"   📏 Resized from {w}x{h} to {new_width}x{new_height}")
+                    return resized
                 
+                print(f"🖼️  Original image sizes: {img1_np.shape} vs {img2_np.shape}")
                 img1_np = simple_resize(img1_np)
                 img2_np = simple_resize(img2_np)
+                print(f"📊 Processing images: {img1_np.shape} vs {img2_np.shape}")
                 
                 # Run evaluation
                 results = evaluator.evaluate_character_consistency(img1_np, img2_np)
@@ -373,21 +390,33 @@ def main():
                 result_text = format_segmented_results(results, use_advanced_algorithms, img1_np, img2_np)
                 
                 # Log results
-                if DATA_LOGGER and sample_category != "Unknown":
-                    try:
-                        img1_name = getattr(image1, 'name', 'image1.jpg')
-                        img2_name = getattr(image2, 'name', 'image2.jpg')
-                        logged_id = DATA_LOGGER.log_evaluation(
-                            results=results,
-                            sample_category=sample_category,
-                            sample_id=sample_id,
-                            image1_name=img1_name,
-                            image2_name=img2_name,
-                            notes=notes
-                        )
-                        result_text += f"\n\nData logged: {logged_id}"
-                    except Exception as e:
-                        print(f"Failed to log data: {e}")
+                logged_status = "\n\n" + "="*70 + "\n"
+                if DATA_LOGGER:
+                    if sample_category != "Unknown":
+                        try:
+                            img1_name = getattr(image1, 'name', 'image1.jpg')
+                            img2_name = getattr(image2, 'name', 'image2.jpg')
+                            logged_id = DATA_LOGGER.log_evaluation(
+                                results=results,
+                                sample_category=sample_category,
+                                sample_id=sample_id,
+                                image1_name=img1_name,
+                                image2_name=img2_name,
+                                notes=notes
+                            )
+                            logged_status += f"✅ DATA SAVED: {logged_id}\n"
+                            logged_status += f"   Category: {sample_category}\n"
+                            logged_status += f"   Location: evaluation_data/evaluation_results.csv\n"
+                        except Exception as e:
+                            logged_status += f"❌ DATA SAVE FAILED: {str(e)}\n"
+                            print(f"Failed to log data: {e}")
+                    else:
+                        logged_status += "⚠️  DATA NOT SAVED: Please select a category (Basic/Attribute/Boundary)\n"
+                else:
+                    logged_status += "❌ DATA LOGGER NOT INITIALIZED\n"
+                logged_status += "="*70
+                
+                result_text += logged_status
                 
                 return result_text
                 
@@ -416,8 +445,21 @@ def main():
                         with gr.Column():
                             image2_input = gr.Image(type="pil", label="Target Image")
                     with gr.Row():
-                        s_category_input = gr.Dropdown(["Unknown", "Basic", "Attribute", "Boundary"], value="Unknown", label="Sample Category")
-                        s_notes_input = gr.Textbox(label="Notes (Optional)")
+                        s_category_input = gr.Dropdown(
+                            ["Basic", "Attribute", "Boundary", "Unknown"], 
+                            value="Basic", 
+                            label="Sample Category",
+                            info="⚠️ Select category to save results to database"
+                        )
+                        s_sample_id_input = gr.Textbox(
+                            label="Sample ID (Optional)", 
+                            placeholder="Auto-generated if empty",
+                            value=""
+                        )
+                        s_notes_input = gr.Textbox(
+                            label="Notes (Optional)",
+                            placeholder="Add notes about this evaluation"
+                        )
                     s_evaluate_button = gr.Button("Analyze Single", variant="primary")
                     s_output_text = gr.Textbox(label="Results", lines=30, max_lines=50, show_copy_button=True)
 
@@ -428,15 +470,23 @@ def main():
                         with gr.Column():
                             b_images2_input = gr.File(label="Target Images", file_count="multiple", file_types=["image"])
                     with gr.Row():
-                        b_category_input = gr.Dropdown(["Unknown", "Basic", "Attribute", "Boundary"], value="Unknown", label="Sample Category")
-                        b_notes_input = gr.Textbox(label="Notes (Optional)")
+                        b_category_input = gr.Dropdown(
+                            ["Basic", "Attribute", "Boundary", "Unknown"], 
+                            value="Basic", 
+                            label="Sample Category",
+                            info="⚠️ Select category to save results to database"
+                        )
+                        b_notes_input = gr.Textbox(
+                            label="Notes (Optional)",
+                            placeholder="Add notes for all images in batch"
+                        )
                     b_evaluate_button = gr.Button("Analyze Batch", variant="primary")
                     b_output_text = gr.Markdown(label="Batch Results")
                     b_plot_output = gr.BarPlot(x="image_name", y="final_score", title="Batch Results", y_lim=[0, 1])
 
             s_evaluate_button.click(
                 evaluate_images,
-                inputs=[image1_input, image2_input, s_category_input, gr.Textbox(visible=False), s_notes_input],
+                inputs=[image1_input, image2_input, s_category_input, s_sample_id_input, s_notes_input],
                 outputs=s_output_text
             )
             

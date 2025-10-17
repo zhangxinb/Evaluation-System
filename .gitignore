@@ -280,3 +280,5 @@ yarn-error.log*
 Icon?
 ehthumbs.db
 Thumbs.db
+
+evaluation_data/
