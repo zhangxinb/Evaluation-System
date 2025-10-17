@@ -1,17 +1,17 @@
-# Professional Image Evaluation System - Dependencies
-# Optimized for CPU processing with integrated graphics support
-# Last updated: September 23, 2025
+# Professional Image Evaluation System - Dependencies for M1/M2 Mac
+# Optimized for Apple Silicon with MPS (Metal Performance Shaders) support
+# Last updated: October 17, 2025
 
 # ========================================
 # CORE DEEP LEARNING FRAMEWORK
 # ========================================
 
 # TensorFlow - Core ML framework (compatible with DeepFace)
+# Note: TensorFlow has native Apple Silicon support
 tensorflow==2.20.0
 tf-keras==2.20.1
 
-# PyTorch - CPU optimized for cross-platform systems
-# Note: For M1/M2 Mac, remove '+cpu' suffix and extra-index-url
+# PyTorch - Native Apple Silicon support (no +cpu suffix needed)
 torch==2.7.1
 torchvision==0.22.1
 
@@ -25,9 +25,6 @@ deepface==0.0.95
 # Additional face detection backends
 mtcnn==1.0.0
 retina-face==0.0.17
-
-# MediaPipe - CPU-friendly face detection alternative
-# mediapipe>=0.10.0  # Uncomment if needed
 
 # ========================================
 # COMPUTER VISION & IMAGE PROCESSING
@@ -88,9 +85,7 @@ uvicorn==0.37.0
 lpips==0.1.4
 
 # CLIP - Vision-language model for character analysis
-# Note: Use git+https://github.com/openai/CLIP.git for latest version
-# or uncomment the line below for PyPI version (may have conflicts)
-# clip-by-openai==1.0
+# Using official GitHub repo to avoid version conflicts
 git+https://github.com/openai/CLIP.git
 ftfy==6.1.1  # Required for CLIP text processing
 
@@ -130,8 +125,6 @@ huggingface-hub==0.35.1
 tokenizers==0.22.1
 safetensors==0.6.2
 
-# CLIP models handled in evaluation metrics section
-
 # ========================================
 # SYSTEM & PERFORMANCE
 # ========================================
@@ -154,23 +147,44 @@ lz4==4.4.4
 rich==14.1.0
 Pygments==2.19.2
 
-# Code formatting (optional)
-# ruff==0.13.1  # Uncomment for development
-
 # ========================================
-# COMPATIBILITY NOTES
+# M1/M2 MAC SPECIFIC NOTES
 # ========================================
 
-# Important: This configuration is specifically tested on:
-# - Integrated graphics systems
-# - Windows 11
-# - Python 3.13
-# - CPU-only processing mode
+# Installation instructions for Apple Silicon:
+# 
+# 1. Ensure you're using Python 3.9+ (arm64 version, not x86_64)
+#    Check with: python3 -c "import platform; print(platform.machine())"
+#    Should output: arm64
+# 
+# 2. Install Xcode Command Line Tools:
+#    xcode-select --install
+# 
+# 3. Create virtual environment:
+#    python3 -m venv venv
+#    source venv/bin/activate
+# 
+# 4. Upgrade pip:
+#    pip install --upgrade pip setuptools wheel
+# 
+# 5. Install dependencies:
+#    pip install -r requirements-mac-m1.txt
+# 
+# 6. If you encounter issues with specific packages:
+#    - For OpenCV: brew install opencv
+#    - For TensorFlow: It should work natively on M1/M2
+#    - For PyTorch: Use MPS backend for GPU acceleration
+# 
+# 7. To use Metal Performance Shaders (MPS) for GPU acceleration:
+#    In your code, use: device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+# 
+# 8. Known issues:
+#    - Some packages may require compilation from source
+#    - If segment-anything fails, you can comment it out (optional feature)
+#    - DeepFace model downloads happen on first run
 
-# TensorFlow 2.20.0 is used for DeepFace compatibility
-# Some newer TF versions may have LocallyConnected2D issues
-
-# For best performance on integrated graphics:
-# 1. Ensure CPU mode is used (no CUDA)
-# 2. Set appropriate thread counts based on CPU cores
-# 3. Use system memory efficiently
+# Performance tips for M1/M2:
+# - MPS (Metal) provides GPU acceleration for PyTorch
+# - TensorFlow has native Metal support
+# - Use unified memory architecture advantage
+# - Set appropriate thread counts: os.environ['OMP_NUM_THREADS'] = '8'

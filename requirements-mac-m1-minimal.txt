@@ -1,0 +1,107 @@
+# Professional Image Evaluation System - Minimal Dependencies for M1/M2 Mac
+# Core packages only, without optional features
+# Last updated: October 17, 2025
+
+# ========================================
+# INSTALLATION INSTRUCTIONS
+# ========================================
+# 1. python3 -m venv venv
+# 2. source venv/bin/activate
+# 3. pip install --upgrade pip
+# 4. pip install -r requirements-mac-m1-minimal.txt
+
+# ========================================
+# CORE DEEP LEARNING FRAMEWORK
+# ========================================
+
+# TensorFlow - Core ML framework (compatible with DeepFace)
+tensorflow==2.20.0
+tf-keras==2.20.1
+
+# PyTorch - Native Apple Silicon support
+torch==2.7.1
+torchvision==0.22.1
+
+# ========================================
+# FACE RECOGNITION & ANALYSIS
+# ========================================
+
+# DeepFace - Professional face recognition library
+deepface==0.0.95
+
+# Face detection backends
+mtcnn==1.0.0
+retina-face==0.0.17
+
+# ========================================
+# COMPUTER VISION & IMAGE PROCESSING
+# ========================================
+
+# OpenCV - Computer vision library
+opencv-python==4.12.0.88
+
+# Image processing
+pillow==11.0.0
+scikit-image==0.25.2
+
+# ========================================
+# SCIENTIFIC COMPUTING
+# ========================================
+
+numpy==2.1.2
+scipy==1.16.2
+pandas==2.3.2
+
+# ========================================
+# VISUALIZATION
+# ========================================
+
+matplotlib==3.10.6
+seaborn==0.13.2
+
+# ========================================
+# WEB INTERFACE
+# ========================================
+
+gradio==5.46.1
+
+# ========================================
+# EVALUATION METRICS
+# ========================================
+
+# LPIPS - Perceptual similarity metric
+lpips==0.1.4
+
+# CLIP - Vision-language model (from official repo)
+git+https://github.com/openai/CLIP.git
+ftfy==6.1.1
+
+# ========================================
+# UTILITIES
+# ========================================
+
+tqdm==4.67.1
+requests==2.32.5
+PyYAML==6.0.2
+
+# ========================================
+# TRANSFORMER MODELS
+# ========================================
+
+transformers==4.56.2
+huggingface-hub==0.35.1
+tokenizers==0.22.1
+safetensors==0.6.2
+
+# ========================================
+# SYSTEM & PERFORMANCE
+# ========================================
+
+psutil==7.1.0
+pydantic==2.11.9
+
+# ========================================
+# DEBUGGING
+# ========================================
+
+rich==14.1.0
