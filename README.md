@@ -471,27 +471,3 @@ pip install -e .
 # Run tests (when available)
 python -m pytest tests/
 ```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **OpenAI CLIP**: Revolutionary vision-language understanding
-- **LPIPS**: Human-aligned perceptual similarity metrics
-- **DeepFace**: Comprehensive face recognition framework
-- **Gradio**: Elegant web interface framework
-- **TensorFlow & PyTorch**: Deep learning framework foundations
-
-## 📞 Support & Contact
-
-- **Issues**: [GitHub Issues](https://github.com/zhangxinb/Evaluation-System/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/zhangxinb/Evaluation-System/discussions)
-- **Documentation**: This README and inline code documentation
-
----
-
-⭐ **Star this repository** if you find it useful for your research or projects!
-
-**Professional Image Evaluation System** - Advancing the science of AI-generated image quality assessment.
